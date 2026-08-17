@@ -80,11 +80,11 @@ export const buildLinkedIssue = (input: {
 };
 
 export const getLinkedIssues = (session: Session | null | undefined): LinkedIssue[] => {
-  const openchamber = getSessionMetadata(session).openchamber;
-  if (!isRecord(openchamber) || !Array.isArray(openchamber.linked_issues)) return [];
+  const zedcode = getSessionMetadata(session).zedcode;
+  if (!isRecord(zedcode) || !Array.isArray(zedcode.linked_issues)) return [];
   // Malformed entries are dropped rather than rendered: a half-written link
   // has no row worth showing.
-  return openchamber.linked_issues.filter(isLinkedIssue);
+  return zedcode.linked_issues.filter(isLinkedIssue);
 };
 
 export const withLinkedIssue = (
@@ -92,9 +92,9 @@ export const withLinkedIssue = (
   issue: LinkedIssue,
   linked: boolean,
 ): SessionMetadataRecord => {
-  const openchamber = isRecord(metadata.openchamber) ? metadata.openchamber : {};
-  const current = Array.isArray(openchamber.linked_issues)
-    ? openchamber.linked_issues.filter(isLinkedIssue)
+  const zedcode = isRecord(metadata.zedcode) ? metadata.zedcode : {};
+  const current = Array.isArray(zedcode.linked_issues)
+    ? zedcode.linked_issues.filter(isLinkedIssue)
     : [];
   const withoutIssue = current.filter((entry) => entry.id !== issue.id);
   // Re-linking an existing entry replaces it, so a stale title can be refreshed
@@ -103,8 +103,8 @@ export const withLinkedIssue = (
 
   return {
     ...metadata,
-    openchamber: {
-      ...openchamber,
+    zedcode: {
+      ...zedcode,
       linked_issues: next,
     },
   };

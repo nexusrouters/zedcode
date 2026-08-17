@@ -32,7 +32,7 @@ const attachmentState = {
   attachments: new Map<string, { worktreeStatus: 'pending' | 'ready'; worktreeRoot: string }>(),
 };
 
-mock.module('@/lib/openchamberConfig', () => ({
+mock.module('@/lib/zedcodeConfig', () => ({
   substituteCommandVariables: (command: string) => command,
 }));
 

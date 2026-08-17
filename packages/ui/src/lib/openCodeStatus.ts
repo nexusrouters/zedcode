@@ -14,7 +14,7 @@ type ProbeResult = {
   summary: string;
 };
 
-type OpenChamberHealthSnapshot = {
+type ZedCodeHealthSnapshot = {
   openCodePort?: unknown;
   openCodeRunning?: unknown;
   openCodeSecureConnection?: unknown;
@@ -31,7 +31,7 @@ type OpenChamberHealthSnapshot = {
   bunBinaryResolved?: unknown;
 };
 
-type OpenChamberOpencodeResolution = {
+type ZedCodeOpencodeResolution = {
   configured?: unknown;
   resolved?: unknown;
   resolvedDir?: unknown;
@@ -159,7 +159,7 @@ const buildOpenCodeStatusReport = async (): Promise<string> => {
   const healthUrl = urls.health();
   const apiBase = urls.api('/api/');
 
-  const openChamberHealth: OpenChamberHealthSnapshot | null = await (async () => {
+  const zedCodeHealth: ZedCodeHealthSnapshot | null = await (async () => {
     if (!healthUrl) return null;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
@@ -172,7 +172,7 @@ const buildOpenCodeStatusReport = async (): Promise<string> => {
       if (!resp.ok) return null;
       const json = (await resp.json().catch(() => null)) as unknown;
       if (!json || typeof json !== 'object' || Array.isArray(json)) return null;
-      return json as OpenChamberHealthSnapshot;
+      return json as ZedCodeHealthSnapshot;
     } catch {
       return null;
     } finally {
@@ -180,8 +180,8 @@ const buildOpenCodeStatusReport = async (): Promise<string> => {
     }
   })();
 
-  const openChamberOpencodeResolutionResult: {
-    data: OpenChamberOpencodeResolution | null;
+  const zedCodeOpencodeResolutionResult: {
+    data: ZedCodeOpencodeResolution | null;
     status: number | null;
     error: string | null;
   } = await (async () => {
@@ -213,7 +213,7 @@ const buildOpenCodeStatusReport = async (): Promise<string> => {
       if (!json || typeof json !== 'object' || Array.isArray(json)) {
         return { data: null, status: resp.status, error: `invalid json-shape content-type=${contentType}` };
       }
-      return { data: json as OpenChamberOpencodeResolution, status: resp.status, error: null };
+      return { data: json as ZedCodeOpencodeResolution, status: resp.status, error: null };
     } catch (error) {
       return {
         data: null,
@@ -259,27 +259,27 @@ const buildOpenCodeStatusReport = async (): Promise<string> => {
 
   const lines: string[] = [];
   lines.push(`Time: ${now.toISOString()}`);
-  lines.push(`OpenChamber version: ${appVersion}`);
+  lines.push(`ZedCode version: ${appVersion}`);
   lines.push(`Runtime: ${origin || '(unknown)'} (api=${apiBase || '(unknown)'})`);
   lines.push(`OpenCode SDK base: ${opencodeClient.getBaseUrl()}`);
   lines.push(`Event stream: ${eventStreamStatus}`);
   lines.push(`Directory: ${directory || '(none)'}`);
   lines.push(`Platform: ${platform}`);
 
-  const runtimeOpenCodePort = normalizePort(openChamberHealth?.openCodePort);
+  const runtimeOpenCodePort = normalizePort(zedCodeHealth?.openCodePort);
   lines.push(`OpenCode runtime port: ${runtimeOpenCodePort ?? '(unknown)'}`);
-  if (typeof openChamberHealth?.openCodeRunning === 'boolean') {
-    lines.push(`OpenCode runtime running: ${openChamberHealth.openCodeRunning ? 'yes' : 'no'}`);
+  if (typeof zedCodeHealth?.openCodeRunning === 'boolean') {
+    lines.push(`OpenCode runtime running: ${zedCodeHealth.openCodeRunning ? 'yes' : 'no'}`);
   }
-  if (typeof openChamberHealth?.openCodeSecureConnection === 'boolean') {
-    lines.push(`Secure OpenCode connection: ${openChamberHealth.openCodeSecureConnection ? 'true' : 'false'}`);
+  if (typeof zedCodeHealth?.openCodeSecureConnection === 'boolean') {
+    lines.push(`Secure OpenCode connection: ${zedCodeHealth.openCodeSecureConnection ? 'true' : 'false'}`);
   }
-  if (typeof openChamberHealth?.openCodeAuthSource === 'string' && openChamberHealth.openCodeAuthSource.trim()) {
-    lines.push(`OpenCode auth source: ${openChamberHealth.openCodeAuthSource}`);
+  if (typeof zedCodeHealth?.openCodeAuthSource === 'string' && zedCodeHealth.openCodeAuthSource.trim()) {
+    lines.push(`OpenCode auth source: ${zedCodeHealth.openCodeAuthSource}`);
   }
 
   if (typeof window !== 'undefined') {
-    const injected = (window as unknown as { __OPENCHAMBER_MACOS_MAJOR__?: unknown }).__OPENCHAMBER_MACOS_MAJOR__;
+    const injected = (window as unknown as { __ZEDCODE_MACOS_MAJOR__?: unknown }).__ZEDCODE_MACOS_MAJOR__;
     if (typeof injected === 'number' && Number.isFinite(injected) && injected > 0) {
       lines.push(`macOS major: ${injected}`);
     }
@@ -290,58 +290,58 @@ const buildOpenCodeStatusReport = async (): Promise<string> => {
     lines.push('');
     lines.push('OpenCode CLI resolution:');
 
-    const launchDiagnostics = isRecord(openChamberHealth?.lastOpenCodeLaunchDiagnostics)
-      ? openChamberHealth.lastOpenCodeLaunchDiagnostics
+    const launchDiagnostics = isRecord(zedCodeHealth?.lastOpenCodeLaunchDiagnostics)
+      ? zedCodeHealth.lastOpenCodeLaunchDiagnostics
       : null;
     const actualLaunchArgs = launchDiagnostics && Array.isArray(launchDiagnostics.args)
       ? launchDiagnostics.args.filter((value): value is string => typeof value === 'string')
       : [];
-    const openChamberOpencodeResolution = openChamberOpencodeResolutionResult.data;
+    const zedCodeOpencodeResolution = zedCodeOpencodeResolutionResult.data;
     const configured =
-      openChamberOpencodeResolution && typeof openChamberOpencodeResolution.configured === 'string'
-        ? openChamberOpencodeResolution.configured
+      zedCodeOpencodeResolution && typeof zedCodeOpencodeResolution.configured === 'string'
+        ? zedCodeOpencodeResolution.configured
         : null;
     const resolved =
-      openChamberOpencodeResolution && typeof openChamberOpencodeResolution.resolved === 'string'
-        ? openChamberOpencodeResolution.resolved
-        : (openChamberHealth && typeof openChamberHealth.opencodeBinaryResolved === 'string' ? openChamberHealth.opencodeBinaryResolved : '');
+      zedCodeOpencodeResolution && typeof zedCodeOpencodeResolution.resolved === 'string'
+        ? zedCodeOpencodeResolution.resolved
+        : (zedCodeHealth && typeof zedCodeHealth.opencodeBinaryResolved === 'string' ? zedCodeHealth.opencodeBinaryResolved : '');
     const resolvedDir =
-      openChamberOpencodeResolution && typeof openChamberOpencodeResolution.resolvedDir === 'string'
-        ? openChamberOpencodeResolution.resolvedDir
+      zedCodeOpencodeResolution && typeof zedCodeOpencodeResolution.resolvedDir === 'string'
+        ? zedCodeOpencodeResolution.resolvedDir
         : '';
     const source =
-      openChamberOpencodeResolution && typeof openChamberOpencodeResolution.source === 'string'
-        ? openChamberOpencodeResolution.source
-        : (openChamberHealth && typeof openChamberHealth.opencodeBinarySource === 'string' ? openChamberHealth.opencodeBinarySource : '');
+      zedCodeOpencodeResolution && typeof zedCodeOpencodeResolution.source === 'string'
+        ? zedCodeOpencodeResolution.source
+        : (zedCodeHealth && typeof zedCodeHealth.opencodeBinarySource === 'string' ? zedCodeHealth.opencodeBinarySource : '');
     const configuredLaunchBinary =
-      openChamberOpencodeResolution && typeof openChamberOpencodeResolution.launchBinary === 'string'
-        ? openChamberOpencodeResolution.launchBinary
-        : (openChamberHealth && typeof openChamberHealth.opencodeLaunchBinary === 'string' ? openChamberHealth.opencodeLaunchBinary : '');
+      zedCodeOpencodeResolution && typeof zedCodeOpencodeResolution.launchBinary === 'string'
+        ? zedCodeOpencodeResolution.launchBinary
+        : (zedCodeHealth && typeof zedCodeHealth.opencodeLaunchBinary === 'string' ? zedCodeHealth.opencodeLaunchBinary : '');
     const configuredLaunchWrapperType =
-      openChamberOpencodeResolution && typeof openChamberOpencodeResolution.launchWrapperType === 'string'
-        ? openChamberOpencodeResolution.launchWrapperType
-        : (openChamberHealth && typeof openChamberHealth.opencodeLaunchWrapperType === 'string' ? openChamberHealth.opencodeLaunchWrapperType : '');
+      zedCodeOpencodeResolution && typeof zedCodeOpencodeResolution.launchWrapperType === 'string'
+        ? zedCodeOpencodeResolution.launchWrapperType
+        : (zedCodeHealth && typeof zedCodeHealth.opencodeLaunchWrapperType === 'string' ? zedCodeHealth.opencodeLaunchWrapperType : '');
     const configuredLaunchArgs =
-      openChamberOpencodeResolution && Array.isArray(openChamberOpencodeResolution.launchArgs)
-        ? openChamberOpencodeResolution.launchArgs.filter((value): value is string => typeof value === 'string')
-        : (openChamberHealth && Array.isArray(openChamberHealth.opencodeLaunchArgs)
-          ? openChamberHealth.opencodeLaunchArgs.filter((value): value is string => typeof value === 'string')
+      zedCodeOpencodeResolution && Array.isArray(zedCodeOpencodeResolution.launchArgs)
+        ? zedCodeOpencodeResolution.launchArgs.filter((value): value is string => typeof value === 'string')
+        : (zedCodeHealth && Array.isArray(zedCodeHealth.opencodeLaunchArgs)
+          ? zedCodeHealth.opencodeLaunchArgs.filter((value): value is string => typeof value === 'string')
           : []);
     const node =
-      openChamberOpencodeResolution && typeof openChamberOpencodeResolution.node === 'string'
-        ? openChamberOpencodeResolution.node
-        : (openChamberHealth && typeof openChamberHealth.nodeBinaryResolved === 'string' ? openChamberHealth.nodeBinaryResolved : '');
+      zedCodeOpencodeResolution && typeof zedCodeOpencodeResolution.node === 'string'
+        ? zedCodeOpencodeResolution.node
+        : (zedCodeHealth && typeof zedCodeHealth.nodeBinaryResolved === 'string' ? zedCodeHealth.nodeBinaryResolved : '');
     const bun =
-      openChamberOpencodeResolution && typeof openChamberOpencodeResolution.bun === 'string'
-        ? openChamberOpencodeResolution.bun
-        : (openChamberHealth && typeof openChamberHealth.bunBinaryResolved === 'string' ? openChamberHealth.bunBinaryResolved : '');
+      zedCodeOpencodeResolution && typeof zedCodeOpencodeResolution.bun === 'string'
+        ? zedCodeOpencodeResolution.bun
+        : (zedCodeHealth && typeof zedCodeHealth.bunBinaryResolved === 'string' ? zedCodeHealth.bunBinaryResolved : '');
     const detectedNow =
-      openChamberOpencodeResolution && typeof openChamberOpencodeResolution.detectedNow === 'string'
-        ? openChamberOpencodeResolution.detectedNow
+      zedCodeOpencodeResolution && typeof zedCodeOpencodeResolution.detectedNow === 'string'
+        ? zedCodeOpencodeResolution.detectedNow
         : '';
     const detectedSourceNow =
-      openChamberOpencodeResolution && typeof openChamberOpencodeResolution.detectedSourceNow === 'string'
-        ? openChamberOpencodeResolution.detectedSourceNow
+      zedCodeOpencodeResolution && typeof zedCodeOpencodeResolution.detectedSourceNow === 'string'
+        ? zedCodeOpencodeResolution.detectedSourceNow
         : '';
 
     if (configured !== null) {
@@ -374,8 +374,8 @@ const buildOpenCodeStatusReport = async (): Promise<string> => {
       lines.push(`- launch-args: ${configuredLaunchArgs.length ? configuredLaunchArgs.join(' ') : '(none)'}`);
       lines.push(`- runtime: ${formatLaunchRuntime(configuredLaunchWrapperType || '', node, bun)}`);
     }
-    if (!openChamberOpencodeResolution && openChamberOpencodeResolutionResult.error) {
-      lines.push(`- resolution-endpoint: ${openChamberOpencodeResolutionResult.error}`);
+    if (!zedCodeOpencodeResolution && zedCodeOpencodeResolutionResult.error) {
+      lines.push(`- resolution-endpoint: ${zedCodeOpencodeResolutionResult.error}`);
     }
   }
 

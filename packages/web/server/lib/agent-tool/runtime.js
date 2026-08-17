@@ -1,18 +1,18 @@
 import { parse as parseJsonc } from 'jsonc-parser';
 import { pathToFileURL } from 'node:url';
 import {
-  OPENCHAMBER_AGENT_TOOL_ACTION_DEFINITIONS,
-  OPENCHAMBER_AGENT_TOOL_ACTIONS,
-  OPENCHAMBER_WEB_ACTION_DEFINITIONS,
-  OPENCHAMBER_WEB_ACTIONS,
-} from '../openchamber-control/actions.js';
+  ZEDCODE_AGENT_TOOL_ACTION_DEFINITIONS,
+  ZEDCODE_AGENT_TOOL_ACTIONS,
+  ZEDCODE_WEB_ACTION_DEFINITIONS,
+  ZEDCODE_WEB_ACTIONS,
+} from '../zedcode-control/actions.js';
 
 const TOOL_SCHEMA_VERSION = 1;
 // Everything either managed tool may ask for; the agent allowlist stays
 // narrower than the full control surface.
-const ACTIONS = new Set([...OPENCHAMBER_AGENT_TOOL_ACTIONS, ...OPENCHAMBER_WEB_ACTIONS]);
+const ACTIONS = new Set([...ZEDCODE_AGENT_TOOL_ACTIONS, ...ZEDCODE_WEB_ACTIONS]);
 const AGENT_TOOL_ACTION_TITLES = Object.fromEntries(
-  [...OPENCHAMBER_AGENT_TOOL_ACTION_DEFINITIONS, ...OPENCHAMBER_WEB_ACTION_DEFINITIONS]
+  [...ZEDCODE_AGENT_TOOL_ACTION_DEFINITIONS, ...ZEDCODE_WEB_ACTION_DEFINITIONS]
     .map(({ action, title }) => [action, title]),
 );
 
@@ -77,9 +77,9 @@ const CONTROL_PARAMETER_PROPERTIES = pickParameters(
 );
 const WEB_PARAMETER_PROPERTIES = pickParameters(WEB_PARAMETER_NAMES);
 
-const CONTROL_TOOL_DESCRIPTION = "Control OpenChamber projects, sessions, and scheduled tasks on the user's behalf. Sessions and scheduled tasks you create are for the user to follow and interact with; never use this tool to delegate parts of your own current task. Use one action per call. Scope with projectId or directory; omit both to use the current session directory. Session dispatches return immediately by default and you receive no notification when a dispatched session finishes, so never promise to report back on it; the user follows it in OpenChamber; a dispatched session needs no follow-up from you. If the user later asks how it went, use session.messages (add wait to block until it is idle, lastAssistant for just the final answer) — session.send always sends a NEW prompt and never just waits. Set wait only when the user asks or the next step requires the completed result. Session and worktree deletion are unavailable.";
+const CONTROL_TOOL_DESCRIPTION = "Control ZedCode projects, sessions, and scheduled tasks on the user's behalf. Sessions and scheduled tasks you create are for the user to follow and interact with; never use this tool to delegate parts of your own current task. Use one action per call. Scope with projectId or directory; omit both to use the current session directory. Session dispatches return immediately by default and you receive no notification when a dispatched session finishes, so never promise to report back on it; the user follows it in ZedCode; a dispatched session needs no follow-up from you. If the user later asks how it went, use session.messages (add wait to block until it is idle, lastAssistant for just the final answer) — session.send always sends a NEW prompt and never just waits. Set wait only when the user asks or the next step requires the completed result. Session and worktree deletion are unavailable.";
 
-const WEB_TOOL_DESCRIPTION = "Look at and interact with a web page in OpenChamber's browser panel, so you can check your own work rather than describing what you expect. Use one action per call. Open a page, snapshot it to read its text and its interactive elements, then click, type or scroll using the selectors the snapshot returned; snapshots also report any errors the page logged. Pass a selector to browser.snapshot to read one part of a long page. browser.inspect returns computed styles when the question is how something renders. Set viewport to check a layout at mobile, tablet or desktop size. The page runs with the user's real logins, so treat what you see as their live session.";
+const WEB_TOOL_DESCRIPTION = "Look at and interact with a web page in ZedCode's browser panel, so you can check your own work rather than describing what you expect. Use one action per call. Open a page, snapshot it to read its text and its interactive elements, then click, type or scroll using the selectors the snapshot returned; snapshots also report any errors the page logged. Pass a selector to browser.snapshot to read one part of a long page. browser.inspect returns computed styles when the question is how something renders. Set viewport to check a layout at mobile, tablet or desktop size. The page runs with the user's real logins, so treat what you see as their live session.";
 
 const asNonEmptyString = (value) => {
   if (typeof value !== 'string') return null;
@@ -114,7 +114,7 @@ const isLoopbackAddress = (value) => {
 const createToolEntry = ({ name, description, actions, definitions, parameters }) => String.raw`    ${name}: {
       description: ${JSON.stringify(description)},
       args: {
-        action: { type: "string", enum: ${JSON.stringify(actions)}, oneOf: ${JSON.stringify(definitions.map((entry) => ({ const: entry.action, description: entry.description })))}, description: "OpenChamber action to perform" },
+        action: { type: "string", enum: ${JSON.stringify(actions)}, oneOf: ${JSON.stringify(definitions.map((entry) => ({ const: entry.action, description: entry.description })))}, description: "ZedCode action to perform" },
         parameters: { type: "object", properties: ${JSON.stringify(parameters)}, additionalProperties: false, description: "Inputs for the action; use an empty object when none are needed" },
       },
       async execute(input, context) {
@@ -136,15 +136,15 @@ const createToolEntry = ({ name, description, actions, definitions, parameters }
             },
           },
         })
-        const endpoint = process.env.OPENCHAMBER_AGENT_TOOL_URL
-        const token = process.env.OPENCHAMBER_AGENT_TOOL_TOKEN
+        const endpoint = process.env.ZEDCODE_AGENT_TOOL_URL
+        const token = process.env.ZEDCODE_AGENT_TOOL_TOKEN
         const failure = (payload) => ({
           title,
           output: JSON.stringify(payload),
-          metadata: { openchamber: { schemaVersion: ${TOOL_SCHEMA_VERSION}, action: args.action, description: title, ok: false } },
+          metadata: { zedcode: { schemaVersion: ${TOOL_SCHEMA_VERSION}, action: args.action, description: title, ok: false } },
         })
         if (!endpoint || !token) {
-          return failure({ schemaVersion: ${TOOL_SCHEMA_VERSION}, ok: false, action: args.action, error: { message: "OpenChamber managed tool connection is unavailable" } })
+          return failure({ schemaVersion: ${TOOL_SCHEMA_VERSION}, ok: false, action: args.action, error: { message: "ZedCode managed tool connection is unavailable" } })
         }
 
         try {
@@ -172,8 +172,8 @@ const createToolEntry = ({ name, description, actions, definitions, parameters }
               },
             },
           })
-          if (valid) return { title, output, metadata: { openchamber: { schemaVersion: ${TOOL_SCHEMA_VERSION}, action: args.action, description: title, ok: result.ok === true } } }
-          return failure({ schemaVersion: ${TOOL_SCHEMA_VERSION}, ok: false, action: args.action, error: { message: "OpenChamber returned an invalid response", kind: "runtime", status: response.status } })
+          if (valid) return { title, output, metadata: { zedcode: { schemaVersion: ${TOOL_SCHEMA_VERSION}, action: args.action, description: title, ok: result.ok === true } } }
+          return failure({ schemaVersion: ${TOOL_SCHEMA_VERSION}, ok: false, action: args.action, error: { message: "ZedCode returned an invalid response", kind: "runtime", status: response.status } })
         } catch (error) {
           if (context.abort.aborted) throw error
           return failure({ schemaVersion: ${TOOL_SCHEMA_VERSION}, ok: false, action: args.action, error: { message: error instanceof Error ? error.message : String(error), kind: "runtime" } })
@@ -186,24 +186,24 @@ const createPluginSource = ({ includeControl, includeWeb }) => {
   const entries = [];
   if (includeControl) {
     entries.push(createToolEntry({
-      name: 'openchamber',
+      name: 'zedcode',
       description: CONTROL_TOOL_DESCRIPTION,
-      actions: OPENCHAMBER_AGENT_TOOL_ACTIONS,
-      definitions: OPENCHAMBER_AGENT_TOOL_ACTION_DEFINITIONS,
+      actions: ZEDCODE_AGENT_TOOL_ACTIONS,
+      definitions: ZEDCODE_AGENT_TOOL_ACTION_DEFINITIONS,
       parameters: CONTROL_PARAMETER_PROPERTIES,
     }));
   }
   if (includeWeb) {
     entries.push(createToolEntry({
-      name: 'openchamber_web',
+      name: 'zedcode_web',
       description: WEB_TOOL_DESCRIPTION,
-      actions: OPENCHAMBER_WEB_ACTIONS,
-      definitions: OPENCHAMBER_WEB_ACTION_DEFINITIONS,
+      actions: ZEDCODE_WEB_ACTIONS,
+      definitions: ZEDCODE_WEB_ACTION_DEFINITIONS,
       parameters: WEB_PARAMETER_PROPERTIES,
     }));
   }
 
-  return `export const OpenChamberPlugin = async () => ({
+  return `export const ZedCodePlugin = async () => ({
   tool: {
 ${entries.join('')}  },
 })
@@ -214,10 +214,10 @@ const mergePluginConfig = (rawConfig, pluginUrl) => {
   const errors = [];
   const parsed = asNonEmptyString(rawConfig) ? parseJsonc(rawConfig, errors, { allowTrailingComma: true }) : {};
   if (errors.length > 0 || !parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new Error('OPENCODE_CONFIG_CONTENT must contain a valid JSON object before OpenChamber can inject its managed tool');
+    throw new Error('OPENCODE_CONFIG_CONTENT must contain a valid JSON object before ZedCode can inject its managed tool');
   }
   if (parsed.plugin !== undefined && !Array.isArray(parsed.plugin)) {
-    throw new Error('OPENCODE_CONFIG_CONTENT plugin must be an array before OpenChamber can inject its managed tool');
+    throw new Error('OPENCODE_CONFIG_CONTENT plugin must be an array before ZedCode can inject its managed tool');
   }
   const configured = Array.isArray(parsed.plugin) ? parsed.plugin : [];
   parsed.plugin = [
@@ -238,16 +238,16 @@ export const createAgentToolRuntime = (dependencies) => {
     env = process.env,
   } = dependencies;
   const pluginDirectory = path.join(dataDir, 'agent-tool');
-  const pluginPath = path.join(pluginDirectory, 'openchamber-plugin.js');
+  const pluginPath = path.join(pluginDirectory, 'zedcode-plugin.js');
   let activeToken = null;
 
   const prepareManagedOpenCodeEnv = async ({ includeControl = true, includeWeb = true } = {}) => {
     const port = getActivePort();
     if (!Number.isInteger(port) || port <= 0) {
-      throw new Error('OpenChamber listener port is unavailable for managed tool injection');
+      throw new Error('ZedCode listener port is unavailable for managed tool injection');
     }
     if (!includeControl && !includeWeb) {
-      throw new Error('At least one OpenChamber managed tool must be enabled to inject the plugin');
+      throw new Error('At least one ZedCode managed tool must be enabled to inject the plugin');
     }
     await fsPromises.mkdir(pluginDirectory, { recursive: true });
     await fsPromises.writeFile(pluginPath, createPluginSource({ includeControl, includeWeb }), { mode: 0o600 });
@@ -255,8 +255,8 @@ export const createAgentToolRuntime = (dependencies) => {
     const pluginUrl = pathToFileURL(pluginPath).href;
     return {
       OPENCODE_CONFIG_CONTENT: mergePluginConfig(env.OPENCODE_CONFIG_CONTENT, pluginUrl),
-      OPENCHAMBER_AGENT_TOOL_URL: `http://127.0.0.1:${port}/api/openchamber/agent-tool`,
-      OPENCHAMBER_AGENT_TOOL_TOKEN: activeToken,
+      ZEDCODE_AGENT_TOOL_URL: `http://127.0.0.1:${port}/api/zedcode/agent-tool`,
+      ZEDCODE_AGENT_TOOL_TOKEN: activeToken,
     };
   };
 
@@ -272,10 +272,10 @@ export const createAgentToolRuntime = (dependencies) => {
   const execute = async (payload = {}, options = {}) => {
     const action = asNonEmptyString(payload.input?.action);
     if (!action || !ACTIONS.has(action)) {
-      return createResult({ ok: false, action, error: { message: `Unsupported OpenChamber action: ${action || 'missing'}`, kind: 'usage' } });
+      return createResult({ ok: false, action, error: { message: `Unsupported ZedCode action: ${action || 'missing'}`, kind: 'usage' } });
     }
     if (typeof executeAction !== 'function') {
-      return createResult({ ok: false, action, error: { message: 'OpenChamber control service is unavailable', kind: 'runtime' } });
+      return createResult({ ok: false, action, error: { message: 'ZedCode control service is unavailable', kind: 'runtime' } });
     }
     try {
       const data = await executeAction(action, payload.input, payload.contextDirectory, options);
@@ -299,7 +299,7 @@ export const createAgentToolRuntime = (dependencies) => {
   };
 
   const registerRoutes = (app, express) => {
-    app.post('/api/openchamber/agent-tool', express.json({ limit: '1mb' }), async (req, res) => {
+    app.post('/api/zedcode/agent-tool', express.json({ limit: '1mb' }), async (req, res) => {
       if (!authorize(req)) return res.status(401).json({ error: 'Unauthorized' });
       const controller = new AbortController();
       const abortOnDisconnect = () => {

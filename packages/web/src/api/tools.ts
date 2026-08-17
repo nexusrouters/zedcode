@@ -1,5 +1,5 @@
-import type { ToolsAPI } from '@openchamber/ui/lib/api/types';
-import { runtimeFetch } from '@openchamber/ui/lib/runtime-fetch';
+import type { ToolsAPI } from '@zedcode/ui/lib/api/types';
+import { runtimeFetch } from '@zedcode/ui/lib/runtime-fetch';
 
 export const createWebToolsAPI = (): ToolsAPI => ({
   async getAvailableTools(): Promise<string[]> {

@@ -64,7 +64,7 @@ import {
   registerCommonRequestMiddleware,
   registerServerStatusRoutes,
 } from './lib/opencode/core-routes.js';
-import { registerOpenChamberRoutes } from './lib/opencode/openchamber-routes.js';
+import { registerZedCodeRoutes } from './lib/opencode/zedcode-routes.js';
 import { createServerUtilsRuntime } from './lib/opencode/server-utils-runtime.js';
 import { createStaticRoutesRuntime } from './lib/opencode/static-routes-runtime.js';
 import { createSettingsRuntime } from './lib/opencode/settings-runtime.js';
@@ -102,19 +102,19 @@ import { createDevTunnelRuntime } from './lib/dev-tunnel/runtime.js';
 import { registerBrowserControlRoutes } from './lib/browser-control/routes.js';
 import { registerZedcodeRoutes } from './lib/zedcode/routes.js';
 import { createSystemPromptRuntime } from './lib/system-prompt/runtime.js';
-import { createOpenChamberSessionService } from './lib/openchamber-sessions/routes.js';
+import { createZedCodeSessionService } from './lib/zedcode-sessions/routes.js';
 import { createScheduledTaskService } from './lib/scheduled-tasks/service.js';
-import { createOpenChamberControlService } from './lib/openchamber-control/service.js';
+import { createZedCodeControlService } from './lib/zedcode-control/service.js';
 import webPush from 'web-push';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const DEFAULT_PORT = 3000;
-const DESKTOP_NOTIFY_PREFIX = '[OpenChamberDesktopNotify] ';
+const DESKTOP_NOTIFY_PREFIX = '[ZedCodeDesktopNotify] ';
 const uiNotificationClients = new Set();
 const uiNotificationWsClients = new Set();
-const uiOpenChamberEventClients = new Set();
+const uiZedCodeEventClients = new Set();
 const HEALTH_CHECK_INTERVAL = 15000;
 const SHUTDOWN_TIMEOUT = 10000;
 const MODELS_DEV_API_URL = 'https://models.dev/api.json';
@@ -154,12 +154,12 @@ const SSE_PATH_PREFIXES = [
   '/api/event',
   '/api/global/event',
   '/api/notifications/stream',
-  '/api/openchamber/events',
-  '/api/openchamber/realtime-proxy/sse',
+  '/api/zedcode/events',
+  '/api/zedcode/realtime-proxy/sse',
 ];
 
 function shouldSkipCompression(req, res) {
-  if (process.env.OPENCHAMBER_RUNTIME === 'desktop') {
+  if (process.env.ZEDCODE_RUNTIME === 'desktop') {
     return true;
   }
 
@@ -181,7 +181,7 @@ function shouldSkipCompression(req, res) {
   return headerIncludesEventStream(res.getHeader('Content-Type'));
 }
 
-const OPENCHAMBER_VERSION = (() => {
+const ZEDCODE_VERSION = (() => {
   try {
     const packagePath = path.resolve(__dirname, '..', 'package.json');
     const raw = fs.readFileSync(packagePath, 'utf8');
@@ -209,13 +209,13 @@ const isEnvFlagDisabled = (value) => {
 };
 
 const shouldSkipApiCompression = () => {
-  if (isEnvFlagEnabled(process.env.OPENCHAMBER_SKIP_API_COMPRESSION)) return true;
-  if (isEnvFlagEnabled(process.env.OPENCHAMBER_COMPRESS_API)) return false;
-  if (isEnvFlagDisabled(process.env.OPENCHAMBER_COMPRESS_API)) return true;
-  return process.env.OPENCHAMBER_RUNTIME === 'desktop';
+  if (isEnvFlagEnabled(process.env.ZEDCODE_SKIP_API_COMPRESSION)) return true;
+  if (isEnvFlagEnabled(process.env.ZEDCODE_COMPRESS_API)) return false;
+  if (isEnvFlagDisabled(process.env.ZEDCODE_COMPRESS_API)) return true;
+  return process.env.ZEDCODE_RUNTIME === 'desktop';
 };
 
-const OPENCHAMBER_VERBOSE_REQUEST_LOGS = isEnvFlagEnabled(process.env.OPENCHAMBER_VERBOSE_REQUEST_LOGS);
+const ZEDCODE_VERBOSE_REQUEST_LOGS = isEnvFlagEnabled(process.env.ZEDCODE_VERBOSE_REQUEST_LOGS);
 
 const PLAN_MODE_EXPERIMENT_ENABLED =
   isEnvFlagEnabled(process.env.OPENCODE_EXPERIMENTAL_PLAN_MODE)
@@ -255,9 +255,9 @@ const sanitizeModelRefs = (...args) => settingsNormalizationRuntime.sanitizeMode
 const sanitizeSkillCatalogs = (...args) => settingsNormalizationRuntime.sanitizeSkillCatalogs(...args);
 const sanitizeProjects = (...args) => settingsNormalizationRuntime.sanitizeProjects(...args);
 
-const OPENCHAMBER_USER_CONFIG_ROOT = path.join(os.homedir(), '.config', 'openchamber');
-const OPENCHAMBER_USER_THEMES_DIR = path.join(OPENCHAMBER_USER_CONFIG_ROOT, 'themes');
-const OPENCHAMBER_PROJECTS_CONFIG_DIR = path.join(OPENCHAMBER_USER_CONFIG_ROOT, 'projects');
+const ZEDCODE_USER_CONFIG_ROOT = path.join(os.homedir(), '.config', 'zedcode');
+const ZEDCODE_USER_THEMES_DIR = path.join(ZEDCODE_USER_CONFIG_ROOT, 'themes');
+const ZEDCODE_PROJECTS_CONFIG_DIR = path.join(ZEDCODE_USER_CONFIG_ROOT, 'projects');
 
 const MAX_THEME_JSON_BYTES = 512 * 1024;
 
@@ -265,7 +265,7 @@ const MAX_THEME_JSON_BYTES = 512 * 1024;
 const themeRuntime = createThemeRuntime({
   fsPromises,
   path,
-  themesDir: OPENCHAMBER_USER_THEMES_DIR,
+  themesDir: ZEDCODE_USER_THEMES_DIR,
   maxThemeJsonBytes: MAX_THEME_JSON_BYTES,
   logger: console,
 });
@@ -288,16 +288,16 @@ const maybeCacheSessionInfoFromEvent = (...args) => notificationTemplateRuntime.
 const buildTemplateVariables = (...args) => notificationTemplateRuntime.buildTemplateVariables(...args);
 const getCachedZenModels = (...args) => notificationTemplateRuntime.getCachedZenModels(...args);
 
-const OPENCHAMBER_DATA_DIR = process.env.OPENCHAMBER_DATA_DIR
-  ? path.resolve(process.env.OPENCHAMBER_DATA_DIR)
-  : path.join(os.homedir(), '.config', 'openchamber');
-const SETTINGS_FILE_PATH = path.join(OPENCHAMBER_DATA_DIR, 'settings.json');
-const PUSH_SUBSCRIPTIONS_FILE_PATH = path.join(OPENCHAMBER_DATA_DIR, 'push-subscriptions.json');
-const APNS_TOKENS_FILE_PATH = path.join(OPENCHAMBER_DATA_DIR, 'apns-tokens.json');
-const REMOTE_CLIENTS_FILE_PATH = path.join(OPENCHAMBER_DATA_DIR, 'remote-clients.json');
-const CLIENT_PAIRING_SESSIONS_FILE_PATH = path.join(OPENCHAMBER_DATA_DIR, 'client-pairing-sessions.json');
-const CLOUDFLARE_MANAGED_REMOTE_TUNNELS_FILE_PATH = path.join(OPENCHAMBER_DATA_DIR, 'cloudflare-managed-remote-tunnels.json');
-const CLOUDFLARE_LEGACY_NAMED_TUNNELS_FILE_PATH = path.join(OPENCHAMBER_DATA_DIR, 'cloudflare-named-tunnels.json');
+const ZEDCODE_DATA_DIR = process.env.ZEDCODE_DATA_DIR
+  ? path.resolve(process.env.ZEDCODE_DATA_DIR)
+  : path.join(os.homedir(), '.config', 'zedcode');
+const SETTINGS_FILE_PATH = path.join(ZEDCODE_DATA_DIR, 'settings.json');
+const PUSH_SUBSCRIPTIONS_FILE_PATH = path.join(ZEDCODE_DATA_DIR, 'push-subscriptions.json');
+const APNS_TOKENS_FILE_PATH = path.join(ZEDCODE_DATA_DIR, 'apns-tokens.json');
+const REMOTE_CLIENTS_FILE_PATH = path.join(ZEDCODE_DATA_DIR, 'remote-clients.json');
+const CLIENT_PAIRING_SESSIONS_FILE_PATH = path.join(ZEDCODE_DATA_DIR, 'client-pairing-sessions.json');
+const CLOUDFLARE_MANAGED_REMOTE_TUNNELS_FILE_PATH = path.join(ZEDCODE_DATA_DIR, 'cloudflare-managed-remote-tunnels.json');
+const CLOUDFLARE_LEGACY_NAMED_TUNNELS_FILE_PATH = path.join(ZEDCODE_DATA_DIR, 'cloudflare-named-tunnels.json');
 const CLOUDFLARE_MANAGED_REMOTE_TUNNELS_VERSION = 1;
 
 const managedTunnelConfigRuntime = createManagedTunnelConfigRuntime({
@@ -470,7 +470,7 @@ const getUpstreamStallTimeoutMs = () => (
 const projectConfigRuntime = createProjectConfigRuntime({
   fsPromises,
   path,
-  projectsDirPath: OPENCHAMBER_PROJECTS_CONFIG_DIR,
+  projectsDirPath: ZEDCODE_PROJECTS_CONFIG_DIR,
 });
 
 // HMR-persistent state via globalThis
@@ -479,7 +479,7 @@ const hmrStateRuntime = createHmrStateRuntime({
   globalThisLike: globalThis,
   os,
   processLike: process,
-  stateKey: '__openchamberHmrState',
+  stateKey: '__zedcodeHmrState',
 });
 const hmrState = hmrStateRuntime.getOrCreateHmrState();
 hmrStateRuntime.ensureUserProvidedOpenCodePassword(hmrState);
@@ -571,19 +571,19 @@ const {
 });
 
 const ENV_SKIP_OPENCODE_START = process.env.OPENCODE_SKIP_START === 'true' ||
-                                    process.env.OPENCHAMBER_SKIP_OPENCODE_START === 'true';
+                                    process.env.ZEDCODE_SKIP_OPENCODE_START === 'true';
 const ENV_DESKTOP_NOTIFY = (() => {
-  if (process.env.OPENCHAMBER_DESKTOP_NOTIFY === 'true') {
+  if (process.env.ZEDCODE_DESKTOP_NOTIFY === 'true') {
     return true;
   }
 
-  if (process.env.OPENCHAMBER_RUNTIME === 'desktop') {
+  if (process.env.ZEDCODE_RUNTIME === 'desktop') {
     return true;
   }
 
   const argv0 = typeof process.argv?.[0] === 'string' ? process.argv[0] : '';
   const argv1 = typeof process.argv?.[1] === 'string' ? process.argv[1] : '';
-  return /openchamber-server/i.test(argv0) || /openchamber-server/i.test(argv1);
+  return /zedcode-server/i.test(argv0) || /zedcode-server/i.test(argv1);
 })();
 const openCodeAuthStateRuntime = createOpenCodeAuthStateRuntime({
   crypto,
@@ -627,7 +627,7 @@ const ensureOpenCodeApiPrefix = (...args) => openCodeNetworkRuntime.ensureOpenCo
 const scheduleOpenCodeApiDetection = (...args) => openCodeNetworkRuntime.scheduleOpenCodeApiDetection(...args);
 
 const ENV_CONFIGURED_API_PREFIX = normalizeApiPrefix(
-  process.env.OPENCODE_API_PREFIX || process.env.OPENCHAMBER_API_PREFIX || ''
+  process.env.OPENCODE_API_PREFIX || process.env.ZEDCODE_API_PREFIX || ''
 );
 
   if (ENV_CONFIGURED_API_PREFIX && ENV_CONFIGURED_API_PREFIX !== '') {
@@ -851,7 +851,7 @@ const processForwardedEventPayload = (payload, emitSyntheticEvent) => {
   }
 
   emitSyntheticEvent({
-    type: 'openchamber:session-status',
+    type: 'zedcode:session-status',
     properties: {
       sessionID: sessionId,
       status,
@@ -872,7 +872,7 @@ const processForwardedEventPayload = (payload, emitSyntheticEvent) => {
   });
 
   emitSyntheticEvent({
-    type: 'openchamber:session-activity',
+    type: 'zedcode:session-activity',
     properties: {
       sessionId,
       phase: status === 'busy' || status === 'retry' ? 'busy' : 'idle',
@@ -964,7 +964,7 @@ const bootstrapRuntime = createBootstrapRuntime({
   registerAuthAndAccessRoutes,
   registerTtsRoutes,
   registerNotificationRoutes,
-  registerOpenChamberRoutes,
+  registerZedCodeRoutes,
   registerAgentToolRoutes: (app, options) => options.agentToolRuntime.registerRoutes(app, options.express),
   express,
 });
@@ -1141,10 +1141,10 @@ const scheduledTasksRuntime = createScheduledTasksRuntime({
   waitForOpenCodeReady,
   setSessionAutoAccept: (sessionId, enabled, directory) => permissionAutoAcceptRuntime.setSessionPolicy(sessionId, enabled, directory),
   emitTaskRunEvent: (event) => {
-    for (const client of uiOpenChamberEventClients) {
+    for (const client of uiZedCodeEventClients) {
       try {
         writeSseEvent(client, {
-          type: 'openchamber:scheduled-task-ran',
+          type: 'zedcode:scheduled-task-ran',
           properties: {
             projectId: event.projectID,
             taskId: event.taskID,
@@ -1154,17 +1154,17 @@ const scheduledTasksRuntime = createScheduledTasksRuntime({
           },
         });
       } catch {
-        uiOpenChamberEventClients.delete(client);
+        uiZedCodeEventClients.delete(client);
       }
     }
   },
   logger: console,
 });
 const emitSessionCreatedEvent = (event) => {
-  for (const client of uiOpenChamberEventClients) {
+  for (const client of uiZedCodeEventClients) {
     try {
       writeSseEvent(client, {
-        type: 'openchamber:session-created',
+        type: 'zedcode:session-created',
         properties: {
           sessionId: event.sessionID,
           directory: event.directory,
@@ -1176,7 +1176,7 @@ const emitSessionCreatedEvent = (event) => {
         },
       });
     } catch {
-      uiOpenChamberEventClients.delete(client);
+      uiZedCodeEventClients.delete(client);
     }
   }
 };
@@ -1186,7 +1186,7 @@ const scheduledTaskService = createScheduledTaskService({
   projectConfigRuntime,
   scheduledTasksRuntime,
 });
-const openChamberSessionService = createOpenChamberSessionService({
+const zedCodeSessionService = createZedCodeSessionService({
   readSettingsFromDiskMigrated,
   sanitizeProjects,
   validateDirectoryPath,
@@ -1195,7 +1195,7 @@ const openChamberSessionService = createOpenChamberSessionService({
   waitForOpenCodeReady,
   emitSessionCreatedEvent,
 });
-// Browser actions are published to whichever OpenChamber clients are connected;
+// Browser actions are published to whichever ZedCode clients are connected;
 // the one owning the browser panel answers. `emitRequest` returns the number of
 // clients reached so the broker can fail fast when nobody is listening.
 const browserControlBroker = createBrowserControlBroker({
@@ -1206,11 +1206,11 @@ const browserControlBroker = createBrowserControlBroker({
     // lets the broker say "not here" instead of timing out.
     const needsBrowserView = request.action !== 'browser.open';
     let delivered = 0;
-    for (const client of uiOpenChamberEventClients) {
-      if (needsBrowserView && client.openchamberBrowserCapable !== true) continue;
+    for (const client of uiZedCodeEventClients) {
+      if (needsBrowserView && client.zedcodeBrowserCapable !== true) continue;
       try {
         writeSseEvent(client, {
-          type: 'openchamber:browser-control-request',
+          type: 'zedcode:browser-control-request',
           properties: {
             requestId: request.requestId,
             action: request.action,
@@ -1219,20 +1219,20 @@ const browserControlBroker = createBrowserControlBroker({
         });
         delivered += 1;
       } catch {
-        uiOpenChamberEventClients.delete(client);
+        uiZedCodeEventClients.delete(client);
       }
     }
     return delivered;
   },
 });
 
-const openChamberControlService = createOpenChamberControlService({
+const zedCodeControlService = createZedCodeControlService({
   readSettingsFromDiskMigrated,
   sanitizeProjects,
   buildOpenCodeUrl,
   getOpenCodeAuthHeaders,
   waitForOpenCodeReady,
-  sessionService: openChamberSessionService,
+  sessionService: zedCodeSessionService,
   scheduledTaskService,
   browserControl: browserControlBroker,
 });
@@ -1320,16 +1320,16 @@ async function main(options = {}) {
   const port = Number.isFinite(options.port) && options.port >= 0 ? Math.trunc(options.port) : DEFAULT_PORT;
   const host = typeof options.host === 'string' && options.host.length > 0 ? options.host : undefined;
   const effectiveBindHost = host
-    || (typeof process.env.OPENCHAMBER_HOST === 'string' && process.env.OPENCHAMBER_HOST.trim().length > 0
-      ? process.env.OPENCHAMBER_HOST.trim()
+    || (typeof process.env.ZEDCODE_HOST === 'string' && process.env.ZEDCODE_HOST.trim().length > 0
+      ? process.env.ZEDCODE_HOST.trim()
       : '127.0.0.1');
   agentToolRuntime = createAgentToolRuntime({
     crypto,
     fsPromises,
     path,
-    dataDir: OPENCHAMBER_DATA_DIR,
+    dataDir: ZEDCODE_DATA_DIR,
     env: process.env,
-    executeAction: (...args) => openChamberControlService.execute(...args),
+    executeAction: (...args) => zedCodeControlService.execute(...args),
     getActivePort: () => {
       const address = server?.address?.();
       return typeof address === 'object' && address ? address.port : null;
@@ -1338,7 +1338,7 @@ async function main(options = {}) {
   systemPromptRuntime = createSystemPromptRuntime({
     fsPromises,
     path,
-    dataDir: OPENCHAMBER_DATA_DIR,
+    dataDir: ZEDCODE_DATA_DIR,
   });
 
   // Pairing transports advertised to the create-device dialog. LAN reachability is
@@ -1419,7 +1419,7 @@ async function main(options = {}) {
   };
   const uiPassword = typeof options.uiPassword === 'string'
     ? options.uiPassword
-    : (typeof process.env.OPENCHAMBER_UI_PASSWORD === 'string' ? process.env.OPENCHAMBER_UI_PASSWORD : null);
+    : (typeof process.env.ZEDCODE_UI_PASSWORD === 'string' ? process.env.ZEDCODE_UI_PASSWORD : null);
   if (
     isNetworkExposedBindHost(effectiveBindHost)
     && !(typeof uiPassword === 'string' && uiPassword.trim().length > 0)
@@ -1428,7 +1428,7 @@ async function main(options = {}) {
     throw new Error(getUnauthenticatedLanErrorMessage(effectiveBindHost));
   }
   const tryCfTunnel = options.tryCfTunnel === true;
-  const apiOnly = options.apiOnly === true || isEnvFlagEnabled(process.env.OPENCHAMBER_API_ONLY);
+  const apiOnly = options.apiOnly === true || isEnvFlagEnabled(process.env.ZEDCODE_API_ONLY);
   const shouldUseCanonicalTunnelConfig = typeof options.tunnelMode === 'string'
     || typeof options.tunnelProvider === 'string'
     || options.tunnelConfigPath === null
@@ -1467,7 +1467,7 @@ async function main(options = {}) {
     ? options.getDesktopRuntimeConfig
     : null;
 
-  console.log(`Starting OpenChamber on port ${port === 0 ? 'auto' : port}`);
+  console.log(`Starting ZedCode on port ${port === 0 ? 'auto' : port}`);
 
   // Voice enumeration is independent from route registration. Start it now,
   // but do not hold server listen or managed OpenCode startup on `say -v "?"`.
@@ -1476,7 +1476,7 @@ async function main(options = {}) {
   const app = express();
   const serverStartedAt = new Date().toISOString();
   const packagedClientOrigins = new Set([
-    'openchamber-ui://app',
+    'zedcode-ui://app',
     'capacitor://localhost',
     'http://localhost',
     'https://localhost',
@@ -1532,8 +1532,8 @@ async function main(options = {}) {
 
   const bootstrapResult = bootstrapRuntime.setupBaseRoutes(app, {
     process,
-    openchamberVersion: OPENCHAMBER_VERSION,
-    runtimeName: process.env.OPENCHAMBER_RUNTIME || 'web',
+    zedcodeVersion: ZEDCODE_VERSION,
+    runtimeName: process.env.ZEDCODE_RUNTIME || 'web',
     serverStartedAt,
     gracefulShutdown,
     getHealthSnapshot: () => {
@@ -1575,7 +1575,7 @@ async function main(options = {}) {
       return Number.isFinite(port) && port > 0 ? port : null;
     },
     getTunnelUrl: () => tunnelRuntimeContextHolder?.tunnelService?.getPublicUrl?.() ?? null,
-    verboseRequestLogs: OPENCHAMBER_VERBOSE_REQUEST_LOGS,
+    verboseRequestLogs: ZEDCODE_VERBOSE_REQUEST_LOGS,
     uiPassword,
     tunnelAuthController,
     remoteClientAuthRuntime,
@@ -1602,9 +1602,9 @@ async function main(options = {}) {
     getServerLabel: () => {
       try {
         const name = os.hostname();
-        return typeof name === 'string' && name.trim().length > 0 ? name.trim() : 'OpenChamber';
+        return typeof name === 'string' && name.trim().length > 0 ? name.trim() : 'ZedCode';
       } catch {
-        return 'OpenChamber';
+        return 'ZedCode';
       }
     },
     readSettingsFromDiskMigrated,
@@ -1631,7 +1631,7 @@ async function main(options = {}) {
     path,
     server,
     __dirname,
-    openchamberDataDir: OPENCHAMBER_DATA_DIR,
+    zedcodeDataDir: ZEDCODE_DATA_DIR,
     modelsDevApiUrl: MODELS_DEV_API_URL,
     modelsMetadataCacheTtl: MODELS_METADATA_CACHE_TTL,
     fetchFreeZenModels,
@@ -1667,7 +1667,7 @@ async function main(options = {}) {
     // the relay identity (serverId), so concurrent hosts evict each other at
     // the relay worker and devices land on a random local instance.
     hostLock: createRelayHostLock({
-      lockFilePath: path.join(OPENCHAMBER_DATA_DIR, 'relay-host.lock'),
+      lockFilePath: path.join(ZEDCODE_DATA_DIR, 'relay-host.lock'),
       fs,
       process,
     }),
@@ -1722,8 +1722,8 @@ async function main(options = {}) {
     spawn,
     resolveGitBinaryForSpawn,
     createFsSearchRuntime: createFsSearchRuntimeFactory,
-    openchamberDataDir: OPENCHAMBER_DATA_DIR,
-    openchamberUserConfigRoot: OPENCHAMBER_USER_CONFIG_ROOT,
+    zedcodeDataDir: ZEDCODE_DATA_DIR,
+    zedcodeUserConfigRoot: ZEDCODE_USER_CONFIG_ROOT,
     normalizeDirectoryPath,
     resolveProjectDirectory,
     resolveOptionalProjectDirectory,
@@ -1742,7 +1742,7 @@ async function main(options = {}) {
     buildOpenCodeUrl,
     getOpenCodeAuthHeaders,
     getOpenCodePort: () => openCodePort,
-    // Dev-server discovery must not offer OpenChamber's own listeners back to
+    // Dev-server discovery must not offer ZedCode's own listeners back to
     // the user as something to preview.
     getOwnPorts: () => [port, openCodePort].filter((value) => Number.isInteger(value) && value > 0),
     devServerScanner,
@@ -1750,11 +1750,11 @@ async function main(options = {}) {
     projectConfigRuntime,
     scheduledTasksRuntime,
     scheduledTaskService,
-    openChamberSessionService,
-    openChamberControlService,
+    zedCodeSessionService,
+    zedCodeControlService,
     waitForOpenCodeReady,
     emitSessionCreatedEvent,
-    getOpenChamberEventClients: () => uiOpenChamberEventClients,
+    getZedCodeEventClients: () => uiZedCodeEventClients,
     writeSseEvent,
     permissionAutoAcceptRuntime,
   });
@@ -1807,7 +1807,7 @@ async function main(options = {}) {
     tunnelRuntimeContext,
     attachSignals,
     apiOnly,
-    dictationModelsDir: path.join(OPENCHAMBER_USER_CONFIG_ROOT, 'speech-models'),
+    dictationModelsDir: path.join(ZEDCODE_USER_CONFIG_ROOT, 'speech-models'),
   });
   terminalRuntime = startupPipelineResult.terminalRuntime;
   dictationRuntime = startupPipelineResult.dictationRuntime;
@@ -1824,7 +1824,7 @@ async function main(options = {}) {
   // device/session exists, stop it (and clear a stale enabled flag) otherwise.
   void relayService.reconcile();
 
-  // Relay demand can change outside our routes: `openchamber connect-url
+  // Relay demand can change outside our routes: `zedcode connect-url
   // --relay` writes a pending relay session straight to the on-disk store, and
   // pending sessions expire without any request hitting us. Poll reconcile so a
   // headless instance picks the relay up (or drops it) within a minute.

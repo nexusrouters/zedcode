@@ -15,7 +15,7 @@ const createApp = (overrides = {}) => {
   const dependencies = {
     getOpenCodeUpgradeCapability: () => ({
       supported: false,
-      manager: 'openchamber',
+      manager: 'zedcode',
       reason: 'bundled',
     }),
     buildOpenCodeUrl: (pathname) => `http://127.0.0.1:4096${pathname}`,
@@ -37,8 +37,8 @@ describe('OpenCode upgrade routes', () => {
       .send({})
       .expect(409, {
         success: false,
-        code: 'OPENCODE_UPGRADE_MANAGED_BY_OPENCHAMBER',
-        error: 'OpenCode is bundled with OpenChamber Desktop and updates with the app.',
+        code: 'OPENCODE_UPGRADE_MANAGED_BY_ZEDCODE',
+        error: 'OpenCode is bundled with ZedCode Desktop and updates with the app.',
       });
 
     expect(globalThis.fetch).not.toHaveBeenCalled();
@@ -61,7 +61,7 @@ describe('OpenCode upgrade routes', () => {
       latestVersion: null,
       upgrade: {
         supported: false,
-        manager: 'openchamber',
+        manager: 'zedcode',
         reason: 'bundled',
       },
     });

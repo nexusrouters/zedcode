@@ -13,17 +13,17 @@ export type RuntimeEndpointChangedDetail = {
   previousRuntimeKey: string;
 };
 
-const RUNTIME_ENDPOINT_CHANGED_EVENT = 'openchamber:runtime-endpoint-changed';
-const RUNTIME_ENDPOINT_WILL_CHANGE_EVENT = 'openchamber:runtime-endpoint-will-change';
+const RUNTIME_ENDPOINT_CHANGED_EVENT = 'zedcode:runtime-endpoint-changed';
+const RUNTIME_ENDPOINT_WILL_CHANGE_EVENT = 'zedcode:runtime-endpoint-will-change';
 
 let activeApiBaseUrl = '';
 let activeRuntimeKey = '';
 
-const setWindowRuntimeValue = <K extends '__OPENCHAMBER_API_BASE_URL__' | '__OPENCHAMBER_CLIENT_TOKEN__' | '__OPENCHAMBER_RUNTIME_HEADERS__'>(
+const setWindowRuntimeValue = <K extends '__ZEDCODE_API_BASE_URL__' | '__ZEDCODE_CLIENT_TOKEN__' | '__ZEDCODE_RUNTIME_HEADERS__'>(
   runtimeWindow: typeof window & {
-    __OPENCHAMBER_API_BASE_URL__?: string;
-    __OPENCHAMBER_CLIENT_TOKEN__?: string;
-    __OPENCHAMBER_RUNTIME_HEADERS__?: Record<string, string>;
+    __ZEDCODE_API_BASE_URL__?: string;
+    __ZEDCODE_CLIENT_TOKEN__?: string;
+    __ZEDCODE_RUNTIME_HEADERS__?: Record<string, string>;
   },
   key: K,
   value: (typeof runtimeWindow)[K],
@@ -53,13 +53,13 @@ const normalizeRuntimeUrlKey = (value: string): string => {
 
 const readInjectedApiBaseUrl = (): string => {
   if (typeof window === 'undefined') return '';
-  const injected = (window as typeof window & { __OPENCHAMBER_API_BASE_URL__?: string }).__OPENCHAMBER_API_BASE_URL__;
+  const injected = (window as typeof window & { __ZEDCODE_API_BASE_URL__?: string }).__ZEDCODE_API_BASE_URL__;
   return typeof injected === 'string' ? injected.trim() : '';
 };
 
 const readInjectedLocalOrigin = (): string => {
   if (typeof window === 'undefined') return '';
-  const injected = (window as typeof window & { __OPENCHAMBER_LOCAL_ORIGIN__?: string }).__OPENCHAMBER_LOCAL_ORIGIN__;
+  const injected = (window as typeof window & { __ZEDCODE_LOCAL_ORIGIN__?: string }).__ZEDCODE_LOCAL_ORIGIN__;
   return typeof injected === 'string' ? injected.trim() : '';
 };
 
@@ -89,11 +89,11 @@ let cachedActiveApiBaseUrl: string | null = null;
 let cachedRawApiBaseUrl: string | undefined;
 let cachedRawLocalOrigin: string | undefined;
 
-const readRawRuntimeGlobal = (key: '__OPENCHAMBER_API_BASE_URL__' | '__OPENCHAMBER_LOCAL_ORIGIN__'): string | undefined => {
+const readRawRuntimeGlobal = (key: '__ZEDCODE_API_BASE_URL__' | '__ZEDCODE_LOCAL_ORIGIN__'): string | undefined => {
   if (typeof window === 'undefined') return undefined;
   const value = (window as typeof window & {
-    __OPENCHAMBER_API_BASE_URL__?: string;
-    __OPENCHAMBER_LOCAL_ORIGIN__?: string;
+    __ZEDCODE_API_BASE_URL__?: string;
+    __ZEDCODE_LOCAL_ORIGIN__?: string;
   })[key];
   return typeof value === 'string' ? value : undefined;
 };
@@ -101,8 +101,8 @@ const readRawRuntimeGlobal = (key: '__OPENCHAMBER_API_BASE_URL__' | '__OPENCHAMB
 export const getRuntimeKey = (): string => {
   if (activeRuntimeKey) return activeRuntimeKey;
 
-  const rawApiBaseUrl = readRawRuntimeGlobal('__OPENCHAMBER_API_BASE_URL__');
-  const rawLocalOrigin = readRawRuntimeGlobal('__OPENCHAMBER_LOCAL_ORIGIN__');
+  const rawApiBaseUrl = readRawRuntimeGlobal('__ZEDCODE_API_BASE_URL__');
+  const rawLocalOrigin = readRawRuntimeGlobal('__ZEDCODE_LOCAL_ORIGIN__');
   if (
     cachedActiveApiBaseUrl === activeApiBaseUrl
     && cachedRawApiBaseUrl === rawApiBaseUrl
@@ -148,13 +148,13 @@ export const switchRuntimeEndpoint = (options: { apiBaseUrl: string; clientToken
   activeRuntimeKey = runtimeKey;
   if (typeof window !== 'undefined') {
     const runtimeWindow = window as typeof window & {
-      __OPENCHAMBER_API_BASE_URL__?: string;
-      __OPENCHAMBER_CLIENT_TOKEN__?: string;
-      __OPENCHAMBER_RUNTIME_HEADERS__?: Record<string, string>;
+      __ZEDCODE_API_BASE_URL__?: string;
+      __ZEDCODE_CLIENT_TOKEN__?: string;
+      __ZEDCODE_RUNTIME_HEADERS__?: Record<string, string>;
     };
-    setWindowRuntimeValue(runtimeWindow, '__OPENCHAMBER_API_BASE_URL__', apiBaseUrl);
-    setWindowRuntimeValue(runtimeWindow, '__OPENCHAMBER_CLIENT_TOKEN__', options.clientToken || undefined);
-    setWindowRuntimeValue(runtimeWindow, '__OPENCHAMBER_RUNTIME_HEADERS__', options.requestHeaders || undefined);
+    setWindowRuntimeValue(runtimeWindow, '__ZEDCODE_API_BASE_URL__', apiBaseUrl);
+    setWindowRuntimeValue(runtimeWindow, '__ZEDCODE_CLIENT_TOKEN__', options.clientToken || undefined);
+    setWindowRuntimeValue(runtimeWindow, '__ZEDCODE_RUNTIME_HEADERS__', options.requestHeaders || undefined);
   }
   configureRuntimeUrlResolver({ apiBaseUrl, realtimeBaseUrl: apiBaseUrl });
   setRuntimeExtraHeaders(options.requestHeaders || null);

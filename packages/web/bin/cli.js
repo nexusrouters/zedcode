@@ -48,7 +48,7 @@ import { createTunnelCommand, isValidTunnelDoctorResponse, shouldDisplayTunnelQr
 import {
   resolveDoctorPortStatuses,
   discoverRunningInstances,
-  discoverOpenChamberInstanceOnPort,
+  discoverZedCodeInstanceOnPort,
   discoverLifecycleInstances,
   discoverUnconfirmedRegistryInstanceOnPort,
   resolveTunnelProviders,
@@ -61,9 +61,9 @@ import {
   getPidFilePath,
   getInstanceFilePath,
   isProcessRunning,
-  isOpenchamberCmdline,
-  isOpenchamberProcessRunning,
-  getOpenchamberProcessState,
+  isZedcodeCmdline,
+  isZedcodeProcessRunning,
+  getZedcodeProcessState,
 } from './lib/cli-process.js';
 import {
   intro as clackIntro, outro as clackOutro, cancel as clackCancel,
@@ -345,7 +345,7 @@ async function main() {
   await commands[command](options);
 }
 
-const isCliExecution = isModuleCliExecution(process.argv[1], import.meta.url, fs.realpathSync, 'openchamber');
+const isCliExecution = isModuleCliExecution(process.argv[1], import.meta.url, fs.realpathSync, 'zedcode');
 
 if (isCliExecution) {
   let isHandlingSigint = false;
@@ -438,14 +438,14 @@ export {
   getPidFilePath,
   getInstanceFilePath,
   isProcessRunning,
-  isOpenchamberProcessRunning,
-  isOpenchamberCmdline,
-  getOpenchamberProcessState,
+  isZedcodeProcessRunning,
+  isZedcodeCmdline,
+  getZedcodeProcessState,
   resolveTunnelProviders,
   fetchTunnelProvidersFromPort,
   fetchSystemInfoFromPort,
   discoverRunningInstances,
-  discoverOpenChamberInstanceOnPort,
+  discoverZedCodeInstanceOnPort,
   discoverLifecycleInstances,
   discoverUnconfirmedRegistryInstanceOnPort,
   ensureTunnelProfilesMigrated,

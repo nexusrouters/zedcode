@@ -53,10 +53,10 @@ export const getToolIcon = (toolName: string) => {
     if (tool === 'task') {
         return <Icon name="ai-agent" className={iconClass} />;
     }
-    if (tool === 'openchamber') {
-        return <Icon name="openchamber" className={iconClass} />;
+    if (tool === 'zedcode') {
+        return <Icon name="zedcode" className={iconClass} />;
     }
-    if (tool === 'openchamber_web') {
+    if (tool === 'zedcode_web') {
         return <Icon name="global" className={iconClass} />;
     }
     if (tool === 'question') {

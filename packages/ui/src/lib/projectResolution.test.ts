@@ -2,20 +2,20 @@ import { describe, expect, test } from 'bun:test';
 import { resolveProjectForSessionDirectory } from './projectResolution';
 
 const projects = [
-  { id: 'openchamber', path: '/workspace/openchamber', label: 'OpenChamber' },
+  { id: 'zedcode', path: '/workspace/zedcode', label: 'ZedCode' },
 ];
 
 describe('resolveProjectForSessionDirectory', () => {
   test('resolves a sibling worktree to its registered project', () => {
     const worktrees = new Map([
-      ['/workspace/openchamber', [{
-        path: '/workspace/openchamber-feature',
-        projectDirectory: '/workspace/openchamber',
+      ['/workspace/zedcode', [{
+        path: '/workspace/zedcode-feature',
+        projectDirectory: '/workspace/zedcode',
         branch: 'feature',
         label: 'feature',
       }]],
     ]);
 
-    expect(resolveProjectForSessionDirectory(projects, worktrees, '/workspace/openchamber-feature')).toEqual(projects[0]);
+    expect(resolveProjectForSessionDirectory(projects, worktrees, '/workspace/zedcode-feature')).toEqual(projects[0]);
   });
 });

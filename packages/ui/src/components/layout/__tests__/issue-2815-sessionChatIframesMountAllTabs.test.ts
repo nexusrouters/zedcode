@@ -1,5 +1,5 @@
 /**
- * Regression coverage for https://github.com/openchamber/openchamber/issues/2815
+ * Regression coverage for https://github.com/zedcode/zedcode/issues/2815
  *
  * A full ContextPanel mount is not available in bun test because its import
  * graph includes a Vite worker URL. This test follows the source-level guard

@@ -28,9 +28,9 @@ describe('settings search', () => {
     expect(results.some((result) => result.id === 'integrations.third-party.opencode-claude')).toBe(true);
   });
 
-  test('finds third-party integrations by OpenChamber npm package names', () => {
+  test('finds third-party integrations by ZedCode npm package names', () => {
     const results = buildSettingsSearchResults({
-      query: '@openchamber/opencode-cursor',
+      query: '@zedcode/opencode-cursor',
       runtimeCtx,
       t,
       getPageTitle: (page) => page,

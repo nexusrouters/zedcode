@@ -7,18 +7,18 @@ import { getModelCatalog } from './catalog.js';
 import { resolveSmallModel, parseModelRef, isUsableAuthEntry, getAuthEntryForProvider } from './resolve.js';
 import { callSmallModel, resolveProviderLogin } from './call.js';
 
-const OPENCHAMBER_SETTINGS_FILE = path.join(
-  process.env.OPENCHAMBER_DATA_DIR
-    ? path.resolve(process.env.OPENCHAMBER_DATA_DIR)
-    : path.join(os.homedir(), '.config', 'openchamber'),
+const ZEDCODE_SETTINGS_FILE = path.join(
+  process.env.ZEDCODE_DATA_DIR
+    ? path.resolve(process.env.ZEDCODE_DATA_DIR)
+    : path.join(os.homedir(), '.config', 'zedcode'),
   'settings.json',
 );
 
-// OpenChamber's own settings: when the user unchecks "use default small model"
+// ZedCode's own settings: when the user unchecks "use default small model"
 // their explicit override outranks every other resolution step.
 const readSmallModelSettingsOverride = () => {
   try {
-    const raw = fs.readFileSync(OPENCHAMBER_SETTINGS_FILE, 'utf8');
+    const raw = fs.readFileSync(ZEDCODE_SETTINGS_FILE, 'utf8');
     const settings = JSON.parse(raw);
     if (!settings || typeof settings !== 'object') return null;
     if (settings.smallModelUseDefault !== false) return null;

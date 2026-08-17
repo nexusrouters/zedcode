@@ -1,19 +1,19 @@
 import { createConfiguredWebAPIs, getDesktopRelayRestoreReady } from './runtimeConfig';
 import { registerSW } from 'virtual:pwa-register';
 
-import type { RuntimeAPIs } from '@openchamber/ui/lib/api/types';
-import { resolveHostedSurface, type HostedSurface } from '@openchamber/ui/lib/runtimeSurface';
+import type { RuntimeAPIs } from '@zedcode/ui/lib/api/types';
+import { resolveHostedSurface, type HostedSurface } from '@zedcode/ui/lib/runtimeSurface';
 import {
   isEmbeddedSessionChat,
   requestEmbeddedSessionRuntimeBootstrap,
-} from '@openchamber/ui/components/layout/contextPanelEmbeddedChat';
-import '@openchamber/ui/index.css';
-import '@openchamber/ui/styles/fonts';
+} from '@zedcode/ui/components/layout/contextPanelEmbeddedChat';
+import '@zedcode/ui/index.css';
+import '@zedcode/ui/styles/fonts';
 
 declare global {
   interface Window {
-    __OPENCHAMBER_RUNTIME_APIS__?: RuntimeAPIs;
-    __OPENCHAMBER_SURFACE__?: HostedSurface;
+    __ZEDCODE_RUNTIME_APIS__?: RuntimeAPIs;
+    __ZEDCODE_SURFACE__?: HostedSurface;
   }
 }
 
@@ -88,24 +88,24 @@ const start = async (): Promise<void> => {
   const embeddedBootstrap = isEmbeddedSessionChat()
     ? await requestEmbeddedSessionRuntimeBootstrap()
     : null;
-  window.__OPENCHAMBER_RUNTIME_APIS__ = createConfiguredWebAPIs(embeddedBootstrap);
+  window.__ZEDCODE_RUNTIME_APIS__ = createConfiguredWebAPIs(embeddedBootstrap);
 
   if (hostedSurface === 'mobile') {
-    const { renderMobileApp } = await import('@openchamber/ui/apps/renderMobileApp');
-    renderMobileApp(window.__OPENCHAMBER_RUNTIME_APIS__);
+    const { renderMobileApp } = await import('@zedcode/ui/apps/renderMobileApp');
+    renderMobileApp(window.__ZEDCODE_RUNTIME_APIS__);
     return;
   }
 
   // Hold the render until a desktop relay-host restore has picked its transport.
   await getDesktopRelayRestoreReady();
-  await import('@openchamber/ui/main');
+  await import('@zedcode/ui/main');
 };
 
 void start();
 
 if (import.meta.hot) {
-  import.meta.hot.on('openchamber:theme-updated', (theme: unknown) => {
-    window.dispatchEvent(new CustomEvent('openchamber:theme-hmr', { detail: theme }));
+  import.meta.hot.on('zedcode:theme-updated', (theme: unknown) => {
+    window.dispatchEvent(new CustomEvent('zedcode:theme-hmr', { detail: theme }));
   });
 }
 

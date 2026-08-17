@@ -1,8 +1,8 @@
 /**
  * ZedCode device-flow authentication + zedmux provider wiring for OpenCode.
  *
- * OpenChamber is a GUI on top of the OpenCode CLI. AI providers are configured
- * in OpenCode, not OpenChamber, via two files in the HOME of the process that
+ * ZedCode is a GUI on top of the OpenCode CLI. AI providers are configured
+ * in OpenCode, not ZedCode, via two files in the HOME of the process that
  * runs `opencode serve`:
  *
  *   - Config:      ~/.config/opencode/opencode.json  (provider registry)
@@ -10,7 +10,7 @@
  *
  * This module lets a user log in ONCE through the ZedCode device-flow (no API
  * key paste). The short-lived JWT it returns is injected as the "zedmux"
- * provider credential so the OpenChamber agent talks to zedmux transparently.
+ * provider credential so the ZedCode agent talks to zedmux transparently.
  *
  * All writes MERGE: existing providers / auth entries / settings are preserved.
  */
@@ -30,8 +30,8 @@ const TOKEN_REFRESH_SKEW_MS = 60_000;
 
 // --- Paths ---------------------------------------------------------------
 
-const OPENCHAMBER_DATA_DIR = path.join(os.homedir(), '.local', 'share', 'openchamber');
-const ZEDCODE_AUTH_FILE = path.join(OPENCHAMBER_DATA_DIR, 'zedcode-auth.json');
+const ZEDCODE_DATA_DIR = path.join(os.homedir(), '.local', 'share', 'zedcode');
+const ZEDCODE_AUTH_FILE = path.join(ZEDCODE_DATA_DIR, 'zedcode-auth.json');
 
 const OPENCODE_CONFIG_DIR = path.join(os.homedir(), '.config', 'opencode');
 const OPENCODE_CONFIG_FILE = path.join(OPENCODE_CONFIG_DIR, 'opencode.json');
@@ -89,7 +89,7 @@ function readStoredTokens() {
   };
 }
 
-/** Persists device-flow tokens to a 0600 file in the OpenChamber data dir. */
+/** Persists device-flow tokens to a 0600 file in the ZedCode data dir. */
 function writeStoredTokens(tokens) {
   writeJsonFileSecure(ZEDCODE_AUTH_FILE, {
     access_token: tokens.access_token,

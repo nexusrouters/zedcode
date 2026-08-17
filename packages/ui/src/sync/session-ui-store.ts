@@ -33,7 +33,7 @@ import { composeForkSessionMessage } from "@/lib/messages/executionMeta"
 import { findLatestUserModelChoice } from "@/lib/messages/userModelChoice"
 import { waitForPendingDraftWorktreeRequest } from "@/lib/worktrees/pendingDraftWorktree"
 import { waitForWorktreeBootstrap } from "@/lib/worktrees/worktreeBootstrap"
-import { getWorktreeSetupWaitEnabled } from "@/lib/openchamberConfig"
+import { getWorktreeSetupWaitEnabled } from "@/lib/zedcodeConfig"
 import { resolveProjectForSessionDirectory } from "@/lib/projectResolution"
 import {
   getSyncSessions,
@@ -321,10 +321,10 @@ export type SessionUIState = {
   clearAbortPrompt: () => void
   armAbortPrompt: (durationMs?: number) => number | null
   clearError: () => void
-  markSessionAsOpenChamberCreated: (sessionId: string) => void
-  isOpenChamberCreatedSession: (sessionId: string) => boolean
+  markSessionAsZedCodeCreated: (sessionId: string) => void
+  isZedCodeCreatedSession: (sessionId: string) => boolean
   getContextUsage: (contextLimit: number, outputLimit: number) => SessionContextUsage | null
-  initializeNewOpenChamberSession: (sessionId: string, agents: unknown[]) => void
+  initializeNewZedCodeSession: (sessionId: string, agents: unknown[]) => void
   setWorktreeMetadata: (sessionId: string, metadata: WorktreeMetadata | null) => void
   overrideNewSessionDraftTarget: (options: Record<string, unknown>) => void
   resolvePendingDraftWorktreeTarget: (requestId: string, directory: string | null, options?: Record<string, unknown>) => void
@@ -754,7 +754,7 @@ export async function materializeOpenDraftSession(selection: {
     useSelectionStore.getState().saveAgentModelVariantForSession(created.id, effectiveDraftAgent, selection.providerID, selection.modelID, selection.variant)
   }
 
-  store.initializeNewOpenChamberSession(created.id, configState.agents ?? [])
+  store.initializeNewZedCodeSession(created.id, configState.agents ?? [])
 
   store.setCurrentSession(created.id, createdDirectory)
 
@@ -1156,14 +1156,14 @@ export const useSessionUIStore = create<SessionUIState>()((set, get) => ({
 
   clearError: () => set({ error: null }),
 
-  markSessionAsOpenChamberCreated: (sessionId) =>
+  markSessionAsZedCodeCreated: (sessionId) =>
     set((s) => {
       const next = new Set(s.webUICreatedSessions)
       next.add(sessionId)
       return { webUICreatedSessions: next }
     }),
 
-  isOpenChamberCreatedSession: (sessionId) => get().webUICreatedSessions.has(sessionId),
+  isZedCodeCreatedSession: (sessionId) => get().webUICreatedSessions.has(sessionId),
 
   getContextUsage: (contextLimit: number, outputLimit: number) => {
     if (get().newSessionDraft?.open) return null
@@ -1207,7 +1207,7 @@ export const useSessionUIStore = create<SessionUIState>()((set, get) => ({
     }
   },
 
-  initializeNewOpenChamberSession: () => {
+  initializeNewZedCodeSession: () => {
     // Stub — was a no-op in old store
   },
 
@@ -1735,12 +1735,12 @@ export const useSessionUIStore = create<SessionUIState>()((set, get) => ({
         sourceWorktreeMetadata?.projectDirectory ?? null,
       )
       if (!project?.path) {
-        throw new Error("Project is not registered in OpenChamber")
+        throw new Error("Project is not registered in ZedCode")
       }
 
       const [branchNameModule, configModule, createModule] = await Promise.all([
         import("@/lib/git/branchNameGenerator"),
-        import("@/lib/openchamberConfig"),
+        import("@/lib/zedcodeConfig"),
         import("@/lib/worktrees/worktreeCreate"),
       ])
       const branchName = branchNameModule.generateBranchName()

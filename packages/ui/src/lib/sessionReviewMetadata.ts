@@ -2,7 +2,7 @@ import type { Session } from '@opencode-ai/sdk/v2';
 
 export type SessionMetadataRecord = Record<string, unknown>;
 
-type OpenChamberMetadata = {
+type ZedCodeMetadata = {
   kind?: 'review';
   originalSessionID?: string;
   reviewSessionID?: string;
@@ -16,32 +16,32 @@ export const getSessionMetadata = (session: Session | null | undefined): Session
   return isRecord(metadata) ? metadata : {};
 };
 
-const getOpenChamberMetadata = (metadata: SessionMetadataRecord): OpenChamberMetadata => {
-  const value = metadata.openchamber;
-  return isRecord(value) ? value as OpenChamberMetadata : {};
+const getZedCodeMetadata = (metadata: SessionMetadataRecord): ZedCodeMetadata => {
+  const value = metadata.zedcode;
+  return isRecord(value) ? value as ZedCodeMetadata : {};
 };
 
 export const getReviewSessionID = (session: Session | null | undefined): string | null => {
-  const value = getOpenChamberMetadata(getSessionMetadata(session)).reviewSessionID;
+  const value = getZedCodeMetadata(getSessionMetadata(session)).reviewSessionID;
   return typeof value === 'string' && value.trim().length > 0 ? value : null;
 };
 
 export const getOriginalSessionID = (session: Session | null | undefined): string | null => {
-  const value = getOpenChamberMetadata(getSessionMetadata(session)).originalSessionID;
+  const value = getZedCodeMetadata(getSessionMetadata(session)).originalSessionID;
   return typeof value === 'string' && value.trim().length > 0 ? value : null;
 };
 
 export const isReviewSession = (session: Session | null | undefined): boolean =>
-  getOpenChamberMetadata(getSessionMetadata(session)).kind === 'review' && Boolean(getOriginalSessionID(session));
+  getZedCodeMetadata(getSessionMetadata(session)).kind === 'review' && Boolean(getOriginalSessionID(session));
 
 export const withReviewSessionLink = (
   metadata: SessionMetadataRecord,
   reviewSessionID: string,
 ): SessionMetadataRecord => {
-  const current = getOpenChamberMetadata(metadata);
+  const current = getZedCodeMetadata(metadata);
   return {
     ...metadata,
-    openchamber: {
+    zedcode: {
       ...current,
       reviewSessionID,
     },
@@ -52,10 +52,10 @@ export const withReviewSessionMarker = (
   metadata: SessionMetadataRecord,
   originalSessionID: string,
 ): SessionMetadataRecord => {
-  const current = getOpenChamberMetadata(metadata);
+  const current = getZedCodeMetadata(metadata);
   return {
     ...metadata,
-    openchamber: {
+    zedcode: {
       ...current,
       kind: 'review' as const,
       originalSessionID,
@@ -67,16 +67,16 @@ export const withoutReviewSessionLink = (
   metadata: SessionMetadataRecord,
   reviewSessionID: string,
 ): SessionMetadataRecord => {
-  const current = getOpenChamberMetadata(metadata);
+  const current = getZedCodeMetadata(metadata);
   if (current.reviewSessionID !== reviewSessionID) return metadata;
 
-  const restOpenChamber = { ...current };
-  delete restOpenChamber.reviewSessionID;
+  const restZedCode = { ...current };
+  delete restZedCode.reviewSessionID;
   const next: SessionMetadataRecord = { ...metadata };
-  if (Object.keys(restOpenChamber).length > 0) {
-    next.openchamber = restOpenChamber;
+  if (Object.keys(restZedCode).length > 0) {
+    next.zedcode = restZedCode;
   } else {
-    delete next.openchamber;
+    delete next.zedcode;
   }
   return next;
 };

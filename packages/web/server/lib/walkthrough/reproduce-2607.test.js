@@ -6,7 +6,7 @@ import express from 'express';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
-// Regression for https://github.com/openchamber/openchamber/issues/2607
+// Regression for https://github.com/zedcode/zedcode/issues/2607
 // "[Bug] Why say so?" (walkthrough panel)
 //
 // Before the fix, a walkthrough small model whose provider had no usable login
@@ -20,7 +20,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 const TEMP_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'oc-home-2607-'));
 process.env.HOME = TEMP_HOME;
-process.env.OPENCHAMBER_DATA_DIR = path.join(TEMP_HOME, '.config', 'openchamber');
+process.env.ZEDCODE_DATA_DIR = path.join(TEMP_HOME, '.config', 'zedcode');
 
 const CATALOG = {
   deepseek: {

@@ -1,5 +1,5 @@
 /**
- * Regression coverage for https://github.com/openchamber/openchamber/issues/2903
+ * Regression coverage for https://github.com/zedcode/zedcode/issues/2903
  *
  * Busy embedded session-chat panels were rendering only the working-status row
  * ("…is running command") because ChatContainer gated message reads on the
@@ -139,8 +139,8 @@ const buildMaterializedSubagentSession = () => {
 };
 
 const syncContext = (globalThis as unknown as {
-  __openchamber_sync_context__?: React.Context<unknown>;
-}).__openchamber_sync_context__;
+  __zedcode_sync_context__?: React.Context<unknown>;
+}).__zedcode_sync_context__;
 
 if (!syncContext) {
   throw new Error('sync context was not published on globalThis by @/sync/sync-context');

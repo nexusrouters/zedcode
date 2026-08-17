@@ -7,19 +7,19 @@ export const parseServeCliOptions = ({
 }) => {
   const args = Array.isArray(argv) ? [...argv] : [];
   const envPassword =
-    env.OPENCHAMBER_UI_PASSWORD ||
+    env.ZEDCODE_UI_PASSWORD ||
     env.OPENCODE_UI_PASSWORD ||
     null;
-  const envCfTunnel = env.OPENCHAMBER_TRY_CF_TUNNEL === 'true';
-  const envTunnelProvider = env.OPENCHAMBER_TUNNEL_PROVIDER || undefined;
-  const envTunnelMode = env.OPENCHAMBER_TUNNEL_MODE || undefined;
-  const envTunnelConfigRaw = env.OPENCHAMBER_TUNNEL_CONFIG;
+  const envCfTunnel = env.ZEDCODE_TRY_CF_TUNNEL === 'true';
+  const envTunnelProvider = env.ZEDCODE_TUNNEL_PROVIDER || undefined;
+  const envTunnelMode = env.ZEDCODE_TUNNEL_MODE || undefined;
+  const envTunnelConfigRaw = env.ZEDCODE_TUNNEL_CONFIG;
   const envTunnelConfig = typeof envTunnelConfigRaw === 'string'
     ? (envTunnelConfigRaw.trim().length > 0 ? envTunnelConfigRaw.trim() : null)
     : undefined;
-  const envTunnelToken = env.OPENCHAMBER_TUNNEL_TOKEN || undefined;
-  const envTunnelHostname = env.OPENCHAMBER_TUNNEL_HOSTNAME || undefined;
-  const envApiOnly = env.OPENCHAMBER_API_ONLY === '1' || env.OPENCHAMBER_API_ONLY === 'true';
+  const envTunnelToken = env.ZEDCODE_TUNNEL_TOKEN || undefined;
+  const envTunnelHostname = env.ZEDCODE_TUNNEL_HOSTNAME || undefined;
+  const envApiOnly = env.ZEDCODE_API_ONLY === '1' || env.ZEDCODE_API_ONLY === 'true';
 
   const options = {
     port: defaultPort,

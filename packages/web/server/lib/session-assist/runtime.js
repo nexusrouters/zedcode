@@ -1,7 +1,7 @@
 // Session assist: after a session goes idle and stays quiet, generate a short
 // recap of the agent's last reply plus one suggested user follow-up with the
 // small model, and store both on the session's metadata
-// (metadata.openchamber.assist). Clients decide visibility from
+// (metadata.zedcode.assist). Clients decide visibility from
 // assist.forMessageID — a new message makes the payload stale everywhere
 // without any extra writes.
 //
@@ -12,10 +12,10 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-const OPENCHAMBER_SETTINGS_FILE = path.join(
-  process.env.OPENCHAMBER_DATA_DIR
-    ? path.resolve(process.env.OPENCHAMBER_DATA_DIR)
-    : path.join(os.homedir(), '.config', 'openchamber'),
+const ZEDCODE_SETTINGS_FILE = path.join(
+  process.env.ZEDCODE_DATA_DIR
+    ? path.resolve(process.env.ZEDCODE_DATA_DIR)
+    : path.join(os.homedir(), '.config', 'zedcode'),
   'settings.json',
 );
 
@@ -24,7 +24,7 @@ const OPENCHAMBER_SETTINGS_FILE = path.join(
 // payloads stay untouched — clients keep showing them and dismissal still works.
 const getSessionAssistTargets = () => {
   try {
-    const raw = fs.readFileSync(OPENCHAMBER_SETTINGS_FILE, 'utf8');
+    const raw = fs.readFileSync(ZEDCODE_SETTINGS_FILE, 'utf8');
     const settings = JSON.parse(raw);
     return {
       recap: settings?.sessionRecapEnabled !== false,
@@ -316,8 +316,8 @@ export const createSessionAssistRuntime = ({
     const currentMetadata = freshSession?.metadata && typeof freshSession.metadata === 'object'
       ? freshSession.metadata
       : (session.metadata && typeof session.metadata === 'object' ? session.metadata : {});
-    const currentNamespace = currentMetadata.openchamber && typeof currentMetadata.openchamber === 'object'
-      ? currentMetadata.openchamber
+    const currentNamespace = currentMetadata.zedcode && typeof currentMetadata.zedcode === 'object'
+      ? currentMetadata.zedcode
       : {};
 
     console.log(`[session-assist] generated for ${sessionId} via ${generated.providerID}/${generated.modelID}`);
@@ -327,7 +327,7 @@ export const createSessionAssistRuntime = ({
       body: {
         metadata: {
           ...currentMetadata,
-          openchamber: {
+          zedcode: {
             ...currentNamespace,
             assist: {
               recap,

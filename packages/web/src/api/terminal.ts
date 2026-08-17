@@ -8,7 +8,7 @@ import {
   restartTerminalSession,
   forceKillTerminal,
   listTerminalShells,
-} from '@openchamber/ui/lib/terminalApi';
+} from '@zedcode/ui/lib/terminalApi';
 import type {
   TerminalAPI,
   TerminalHandlers,
@@ -16,7 +16,7 @@ import type {
   ResizeTerminalPayload,
   TerminalSession,
   ForceKillOptions,
-} from '@openchamber/ui/lib/api/types';
+} from '@zedcode/ui/lib/api/types';
 
 export const createWebTerminalAPI = (): TerminalAPI => ({
   async listShells() {

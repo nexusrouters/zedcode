@@ -582,7 +582,7 @@ export const Header: React.FC<HeaderProps> = ({
       return null;
     }
 
-    const injected = (window as unknown as { __OPENCHAMBER_MACOS_MAJOR__?: unknown }).__OPENCHAMBER_MACOS_MAJOR__;
+    const injected = (window as unknown as { __ZEDCODE_MACOS_MAJOR__?: unknown }).__ZEDCODE_MACOS_MAJOR__;
     if (typeof injected === 'number' && Number.isFinite(injected) && injected > 0) {
       return injected;
     }
@@ -740,7 +740,7 @@ export const Header: React.FC<HeaderProps> = ({
     try {
       // Status-only poll: must not count as usage on the remote server's install id.
       const params = new URLSearchParams({ appType: 'web', instanceMode: 'remote', reportUsage: 'false' });
-      const response = await runtimeFetch(`/api/openchamber/update-check?${params.toString()}`, {
+      const response = await runtimeFetch(`/api/zedcode/update-check?${params.toString()}`, {
         method: 'GET',
         headers: { Accept: 'application/json' },
       });
@@ -1089,7 +1089,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const currentSessionTitle = React.useMemo(() => {
     if (!currentSessionId) {
-      return activeProjectLabel ?? 'OpenChamber';
+      return activeProjectLabel ?? 'ZedCode';
     }
     const trimmedTitle = currentSession?.title?.trim();
     return trimmedTitle && trimmedTitle.length > 0 ? trimmedTitle : 'Untitled Session';
@@ -1590,11 +1590,11 @@ export const Header: React.FC<HeaderProps> = ({
     };
 
     void syncFullscreenState();
-    window.addEventListener('openchamber:window-resized', onResize);
+    window.addEventListener('zedcode:window-resized', onResize);
 
     return () => {
       disposed = true;
-      window.removeEventListener('openchamber:window-resized', onResize);
+      window.removeEventListener('zedcode:window-resized', onResize);
     };
   }, [isDesktopApp, isMacPlatform]);
 

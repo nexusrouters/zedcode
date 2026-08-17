@@ -32,7 +32,7 @@ function createUpdateCommand({ importFromFilePath, packageManagerPath, serveComm
     const currentVersion = getCurrentVersion();
 
     if (showOutput) {
-      clackIntro('OpenChamber Update');
+      clackIntro('ZedCode Update');
     }
 
     if (showOutput && !updateSpin) {

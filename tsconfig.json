@@ -13,8 +13,8 @@
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "paths": {
-      "@openchamber/ui/*": ["./packages/ui/src/*"],
-      "@openchamber/web/*": ["./packages/web/src/*"]
+      "@zedcode/ui/*": ["./packages/ui/src/*"],
+      "@zedcode/web/*": ["./packages/web/src/*"]
     }
   }
 }

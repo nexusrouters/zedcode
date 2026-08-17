@@ -16,7 +16,7 @@ const MAX_LOG_LINES_PER_INSTANCE = 1200;
 const MONITOR_INITIAL_POLL_MS = 2000;
 const MONITOR_STEADY_POLL_MS = 10000;
 const MONITOR_STABILIZE_TICKS = 5;
-const SSH_STATUS_EVENT = 'openchamber:ssh-instance-status';
+const SSH_STATUS_EVENT = 'zedcode:ssh-instance-status';
 const MAX_PROCESS_ERROR_CHARS = 2000;
 const MAX_PROCESS_ERROR_CAPTURE_CHARS = MAX_PROCESS_ERROR_CHARS * 2;
 const childProcessDiagnostics = new WeakMap();
@@ -229,9 +229,9 @@ const buildSshArgs = (parsed, preDestinationArgs = [], remoteCommand = null) => 
 const askpassScriptContent = () => `#!/bin/bash
 PROMPT="$1"
 
-if [[ -n "$OPENCHAMBER_SSH_ASKPASS_VALUE" ]]; then
+if [[ -n "$ZEDCODE_SSH_ASKPASS_VALUE" ]]; then
   if [[ "$PROMPT" == *"assword"* || "$PROMPT" == *"passphrase"* ]]; then
-    printf '%s\\n' "$OPENCHAMBER_SSH_ASKPASS_VALUE"
+    printf '%s\\n' "$ZEDCODE_SSH_ASKPASS_VALUE"
     exit 0
   fi
 fi
@@ -274,7 +274,7 @@ const writeAskpassScript = async (scriptPath) => {
   await fsp.chmod(scriptPath, 0o700);
 };
 
-const windowsAskpassScriptContent = () => `$value = [Environment]::GetEnvironmentVariable('OPENCHAMBER_SSH_ASKPASS_VALUE')
+const windowsAskpassScriptContent = () => `$value = [Environment]::GetEnvironmentVariable('ZEDCODE_SSH_ASKPASS_VALUE')
 if ($null -ne $value) {
   [Console]::Out.WriteLine($value)
 }
@@ -355,7 +355,7 @@ const waitLocalForwardReady = async (localPort) => {
     await new Promise((resolve) => setTimeout(resolve, pollMs));
     pollMs = Math.min(pollMs * 2, 2000);
   }
-  throw new Error('Timed out waiting for forwarded OpenChamber health');
+  throw new Error('Timed out waiting for forwarded ZedCode health');
 };
 
 const parseVersionToken = (raw) => {
@@ -412,7 +412,7 @@ export class ElectronSshManager {
       SSH_ASKPASS_REQUIRE: 'force',
       SSH_ASKPASS: auth.askpassPath,
       DISPLAY: '1',
-      ...(auth.sshPassword ? { OPENCHAMBER_SSH_ASKPASS_VALUE: auth.sshPassword.trim() } : {}),
+      ...(auth.sshPassword ? { ZEDCODE_SSH_ASKPASS_VALUE: auth.sshPassword.trim() } : {}),
     };
   }
 
@@ -800,14 +800,14 @@ export class ElectronSshManager {
       connectionTimeoutSec: Number.isFinite(instance?.connectionTimeoutSec) && Number(instance.connectionTimeoutSec) > 0
         ? Number(instance.connectionTimeoutSec)
         : DEFAULT_CONNECTION_TIMEOUT_SEC,
-      remoteOpenchamber: {
-        mode: instance?.remoteOpenchamber?.mode === 'external' ? 'external' : 'managed',
-        keepRunning: instance?.remoteOpenchamber?.keepRunning !== false,
-        ...(Number.isFinite(instance?.remoteOpenchamber?.preferredPort) ? { preferredPort: Number(instance.remoteOpenchamber.preferredPort) } : {}),
-        installMethod: ['npm', 'bun', 'download_release', 'upload_bundle'].includes(instance?.remoteOpenchamber?.installMethod)
-          ? instance.remoteOpenchamber.installMethod
+      remoteZedcode: {
+        mode: instance?.remoteZedcode?.mode === 'external' ? 'external' : 'managed',
+        keepRunning: instance?.remoteZedcode?.keepRunning !== false,
+        ...(Number.isFinite(instance?.remoteZedcode?.preferredPort) ? { preferredPort: Number(instance.remoteZedcode.preferredPort) } : {}),
+        installMethod: ['npm', 'bun', 'download_release', 'upload_bundle'].includes(instance?.remoteZedcode?.installMethod)
+          ? instance.remoteZedcode.installMethod
           : 'bun',
-        uploadBundleOverSsh: Boolean(instance?.remoteOpenchamber?.uploadBundleOverSsh),
+        uploadBundleOverSsh: Boolean(instance?.remoteZedcode?.uploadBundleOverSsh),
       },
       localForward: {
         bindHost: sanitizeBindHost(instance?.localForward?.bindHost),
@@ -815,7 +815,7 @@ export class ElectronSshManager {
       },
       auth: {
         ...(this.sanitizeStoredSecret(instance?.auth?.sshPassword) ? { sshPassword: this.sanitizeStoredSecret(instance.auth.sshPassword) } : {}),
-        ...(this.sanitizeStoredSecret(instance?.auth?.openchamberPassword) ? { openchamberPassword: this.sanitizeStoredSecret(instance.auth.openchamberPassword) } : {}),
+        ...(this.sanitizeStoredSecret(instance?.auth?.zedcodePassword) ? { zedcodePassword: this.sanitizeStoredSecret(instance.auth.zedcodePassword) } : {}),
       },
       portForwards,
     };
@@ -842,8 +842,8 @@ export class ElectronSshManager {
     await writeJsonRoot(this.settingsFilePath, root);
   }
 
-  async issueClientToken(localUrl, openchamberPassword) {
-    const password = typeof openchamberPassword === 'string' ? openchamberPassword.trim() : '';
+  async issueClientToken(localUrl, zedcodePassword) {
+    const password = typeof zedcodePassword === 'string' ? zedcodePassword.trim() : '';
     if (!password) return '';
 
     const loginResponse = await fetch(new URL('/auth/session', `${localUrl}/`).toString(), {
@@ -857,11 +857,11 @@ export class ElectronSshManager {
         password,
         trustDevice: true,
         issueClientToken: true,
-        clientLabel: 'OpenChamber Desktop SSH',
+        clientLabel: 'ZedCode Desktop SSH',
       }),
     });
     if (!loginResponse.ok) {
-      throw new Error(`Configured OpenChamber UI password was rejected by forwarded server (status ${loginResponse.status})`);
+      throw new Error(`Configured ZedCode UI password was rejected by forwarded server (status ${loginResponse.status})`);
     }
 
     const payload = await loginResponse.json().catch(() => null);
@@ -879,7 +879,7 @@ export class ElectronSshManager {
         'Content-Type': 'application/json',
         Cookie: cookie,
       },
-      body: JSON.stringify({ label: 'OpenChamber Desktop SSH' }),
+      body: JSON.stringify({ label: 'ZedCode Desktop SSH' }),
     });
     if (!tokenResponse.ok) return '';
     const tokenPayload = await tokenResponse.json().catch(() => null);
@@ -976,8 +976,8 @@ export class ElectronSshManager {
     throw new Error('SSH ControlMaster connection timed out');
   }
 
-  configuredOpenChamberPassword(instance) {
-    const secret = instance?.auth?.openchamberPassword;
+  configuredZedCodePassword(instance) {
+    const secret = instance?.auth?.zedcodePassword;
     return secret?.enabled && typeof secret.value === 'string' && secret.value.trim() ? secret.value.trim() : null;
   }
 
@@ -990,29 +990,29 @@ export class ElectronSshManager {
     }
   }
 
-  async currentRemoteOpenChamberVersion(parsed, controlPath) {
+  async currentRemoteZedCodeVersion(parsed, controlPath) {
     try {
-      const output = await this.runRemoteCommand(parsed, controlPath, 'openchamber --version 2>/dev/null || true');
+      const output = await this.runRemoteCommand(parsed, controlPath, 'zedcode --version 2>/dev/null || true');
       return parseVersionToken(output);
     } catch {
       return null;
     }
   }
 
-  async installOpenChamberManaged(parsed, controlPath, version, preferred) {
+  async installZedCodeManaged(parsed, controlPath, version, preferred) {
     const hasBun = await this.remoteCommandExists(parsed, controlPath, 'bun');
     const hasNpm = await this.remoteCommandExists(parsed, controlPath, 'npm');
     const commands = [];
 
     if (preferred === 'bun') {
-      if (hasBun) commands.push(`bun add -g @openchamber/web@${version}`);
-      if (hasNpm) commands.push(`npm install -g @openchamber/web@${version}`);
+      if (hasBun) commands.push(`bun add -g @zedcode/web@${version}`);
+      if (hasNpm) commands.push(`npm install -g @zedcode/web@${version}`);
     } else if (preferred === 'npm') {
-      if (hasNpm) commands.push(`npm install -g @openchamber/web@${version}`);
-      if (hasBun) commands.push(`bun add -g @openchamber/web@${version}`);
+      if (hasNpm) commands.push(`npm install -g @zedcode/web@${version}`);
+      if (hasBun) commands.push(`bun add -g @zedcode/web@${version}`);
     } else {
-      if (hasBun) commands.push(`bun add -g @openchamber/web@${version}`);
-      if (hasNpm) commands.push(`npm install -g @openchamber/web@${version}`);
+      if (hasBun) commands.push(`bun add -g @zedcode/web@${version}`);
+      if (hasNpm) commands.push(`npm install -g @zedcode/web@${version}`);
     }
 
     if (commands.length === 0) {
@@ -1028,12 +1028,12 @@ export class ElectronSshManager {
         lastError = error;
       }
     }
-    throw lastError || new Error('Failed to install OpenChamber on remote host');
+    throw lastError || new Error('Failed to install ZedCode on remote host');
   }
 
-  async probeRemoteSystemInfo(parsed, controlPath, port, openchamberPassword) {
-    const authPayload = openchamberPassword ? JSON.stringify({ password: openchamberPassword }) : '{}';
-    const authEnabled = openchamberPassword ? '1' : '0';
+  async probeRemoteSystemInfo(parsed, controlPath, port, zedcodePassword) {
+    const authPayload = zedcodePassword ? JSON.stringify({ password: zedcodePassword }) : '{}';
+    const authEnabled = zedcodePassword ? '1' : '0';
     const script = `AUTH_STATUS=0; INFO_STATUS=0; HEALTH_STATUS=0; BODY_FILE="$(mktemp)"; COOKIE_FILE="$(mktemp)"; cleanup(){ rm -f "$BODY_FILE" "$COOKIE_FILE"; }; trap cleanup EXIT; if command -v curl >/dev/null 2>&1; then if [ "${authEnabled}" = "1" ]; then AUTH_STATUS="$(curl -sS --max-time 3 -o /dev/null -w '%{http_code}' -c "$COOKIE_FILE" -H 'content-type: application/json' --data ${shellQuote(authPayload)} http://127.0.0.1:${port}/auth/session || true)"; if [ "$AUTH_STATUS" = "200" ]; then INFO_STATUS="$(curl -sS --max-time 3 -b "$COOKIE_FILE" -o "$BODY_FILE" -w '%{http_code}' http://127.0.0.1:${port}/api/system/info || true)"; else INFO_STATUS="$(curl -sS --max-time 3 -o "$BODY_FILE" -w '%{http_code}' http://127.0.0.1:${port}/api/system/info || true)"; fi; else INFO_STATUS="$(curl -sS --max-time 3 -o "$BODY_FILE" -w '%{http_code}' http://127.0.0.1:${port}/api/system/info || true)"; fi; HEALTH_STATUS="$(curl -sS --max-time 3 -o /dev/null -w '%{http_code}' http://127.0.0.1:${port}/health || true)"; elif command -v wget >/dev/null 2>&1; then wget -qO "$BODY_FILE" http://127.0.0.1:${port}/api/system/info >/dev/null 2>&1; if [ $? -eq 0 ]; then INFO_STATUS=200; fi; wget -qO- http://127.0.0.1:${port}/health >/dev/null 2>&1; if [ $? -eq 0 ]; then HEALTH_STATUS=200; fi; else exit 127; fi; printf 'INFO_STATUS=%s\\nAUTH_STATUS=%s\\nHEALTH_STATUS=%s\\n' "$INFO_STATUS" "$AUTH_STATUS" "$HEALTH_STATUS"; cat "$BODY_FILE" 2>/dev/null || true`;
     const output = await this.runRemoteCommand(parsed, controlPath, script);
     const lines = output.split(/\r?\n/);
@@ -1044,16 +1044,16 @@ export class ElectronSshManager {
 
     if (isLivenessHttpStatus(infoStatus)) {
       if (isAuthHttpStatus(infoStatus)) {
-        if (openchamberPassword && authStatus !== 200) {
-          throw new Error(`Remote OpenChamber requires UI authentication and configured password was rejected (auth status ${authStatus})`);
+        if (zedcodePassword && authStatus !== 200) {
+          throw new Error(`Remote ZedCode requires UI authentication and configured password was rejected (auth status ${authStatus})`);
         }
         if (isLivenessHttpStatus(healthStatus)) return {};
-        throw new Error('Remote OpenChamber requires UI authentication on /api/system/info; configure OpenChamber UI password');
+        throw new Error('Remote ZedCode requires UI authentication on /api/system/info; configure ZedCode UI password');
       }
     } else if (isLivenessHttpStatus(healthStatus)) {
       return {};
     } else {
-      throw new Error(`Remote OpenChamber probe failed (info status ${infoStatus}, health status ${healthStatus})`);
+      throw new Error(`Remote ZedCode probe failed (info status ${infoStatus}, health status ${healthStatus})`);
     }
 
     try {
@@ -1063,9 +1063,9 @@ export class ElectronSshManager {
     }
   }
 
-  async remoteServerRunning(parsed, controlPath, port, openchamberPassword) {
+  async remoteServerRunning(parsed, controlPath, port, zedcodePassword) {
     try {
-      await this.probeRemoteSystemInfo(parsed, controlPath, port, openchamberPassword);
+      await this.probeRemoteSystemInfo(parsed, controlPath, port, zedcodePassword);
       return true;
     } catch {
       return false;
@@ -1073,12 +1073,12 @@ export class ElectronSshManager {
   }
 
   async startRemoteServerManaged(parsed, controlPath, instance, desiredPort) {
-    let envPrefix = 'OPENCHAMBER_RUNTIME=ssh-remote';
-    const secret = this.configuredOpenChamberPassword(instance);
+    let envPrefix = 'ZEDCODE_RUNTIME=ssh-remote';
+    const secret = this.configuredZedCodePassword(instance);
     if (secret) {
-      envPrefix += ` OPENCHAMBER_UI_PASSWORD=${shellQuote(secret)}`;
+      envPrefix += ` ZEDCODE_UI_PASSWORD=${shellQuote(secret)}`;
     }
-    const output = await this.runRemoteCommand(parsed, controlPath, `${envPrefix} openchamber serve --hostname 127.0.0.1 --port ${desiredPort}`);
+    const output = await this.runRemoteCommand(parsed, controlPath, `${envPrefix} zedcode serve --hostname 127.0.0.1 --port ${desiredPort}`);
     const port = output.split(/\s+/).map((token) => Number.parseInt(token, 10)).find((value) => Number.isFinite(value));
     return port || desiredPort;
   }
@@ -1136,40 +1136,40 @@ export class ElectronSshManager {
   }
 
   async ensureRemoteServer(instance, parsed, controlPath) {
-    if (instance.remoteOpenchamber.mode === 'external') {
-      if (!instance.remoteOpenchamber.preferredPort) {
-        throw new Error('External mode requires a preferred remote OpenChamber port');
+    if (instance.remoteZedcode.mode === 'external') {
+      if (!instance.remoteZedcode.preferredPort) {
+        throw new Error('External mode requires a preferred remote ZedCode port');
       }
-      const port = instance.remoteOpenchamber.preferredPort;
-      this.setStatus(instance.id, 'server_detecting', 'Probing external OpenChamber server', null, null, port, false, 0, false);
-      await this.probeRemoteSystemInfo(parsed, controlPath, port, this.configuredOpenChamberPassword(instance));
+      const port = instance.remoteZedcode.preferredPort;
+      this.setStatus(instance.id, 'server_detecting', 'Probing external ZedCode server', null, null, port, false, 0, false);
+      await this.probeRemoteSystemInfo(parsed, controlPath, port, this.configuredZedCodePassword(instance));
       return { remotePort: port, startedByUs: false };
     }
 
-    this.setStatus(instance.id, 'remote_probe', 'Checking remote OpenChamber installation');
-    const installedVersion = await this.currentRemoteOpenChamberVersion(parsed, controlPath);
+    this.setStatus(instance.id, 'remote_probe', 'Checking remote ZedCode installation');
+    const installedVersion = await this.currentRemoteZedCodeVersion(parsed, controlPath);
     if (!installedVersion) {
-      this.setStatus(instance.id, 'installing', 'Installing OpenChamber on remote host');
-      await this.installOpenChamberManaged(parsed, controlPath, this.appVersion, instance.remoteOpenchamber.installMethod);
+      this.setStatus(instance.id, 'installing', 'Installing ZedCode on remote host');
+      await this.installZedCodeManaged(parsed, controlPath, this.appVersion, instance.remoteZedcode.installMethod);
     } else if (installedVersion !== this.appVersion) {
-      this.setStatus(instance.id, 'updating', `Updating remote OpenChamber from ${installedVersion} to ${this.appVersion}`);
-      await this.installOpenChamberManaged(parsed, controlPath, this.appVersion, instance.remoteOpenchamber.installMethod);
+      this.setStatus(instance.id, 'updating', `Updating remote ZedCode from ${installedVersion} to ${this.appVersion}`);
+      await this.installZedCodeManaged(parsed, controlPath, this.appVersion, instance.remoteZedcode.installMethod);
     }
 
-    this.setStatus(instance.id, 'server_detecting', 'Detecting managed OpenChamber server');
-    let remotePort = instance.remoteOpenchamber.preferredPort || null;
+    this.setStatus(instance.id, 'server_detecting', 'Detecting managed ZedCode server');
+    let remotePort = instance.remoteZedcode.preferredPort || null;
     let startedByUs = false;
-    if (remotePort && !(await this.remoteServerRunning(parsed, controlPath, remotePort, this.configuredOpenChamberPassword(instance)))) {
+    if (remotePort && !(await this.remoteServerRunning(parsed, controlPath, remotePort, this.configuredZedCodePassword(instance)))) {
       remotePort = null;
     }
     if (!remotePort) {
-      this.setStatus(instance.id, 'server_starting', 'Starting managed OpenChamber server');
-      const desiredPort = instance.remoteOpenchamber.preferredPort || randomPortCandidate(instance.id);
+      this.setStatus(instance.id, 'server_starting', 'Starting managed ZedCode server');
+      const desiredPort = instance.remoteZedcode.preferredPort || randomPortCandidate(instance.id);
       remotePort = await this.startRemoteServerManaged(parsed, controlPath, instance, desiredPort);
       startedByUs = true;
     }
-    if (!(await this.remoteServerRunning(parsed, controlPath, remotePort, this.configuredOpenChamberPassword(instance)))) {
-      throw new Error('Managed OpenChamber server failed to become reachable');
+    if (!(await this.remoteServerRunning(parsed, controlPath, remotePort, this.configuredZedCodePassword(instance)))) {
+      throw new Error('Managed ZedCode server failed to become reachable');
     }
     return { remotePort, startedByUs };
   }
@@ -1185,7 +1185,7 @@ export class ElectronSshManager {
     this.sessions.delete(id);
 
     if (session) {
-      if (session.startedByUs && session.remotePort && session.instance.remoteOpenchamber.mode === 'managed' && !session.instance.remoteOpenchamber.keepRunning) {
+      if (session.startedByUs && session.remotePort && session.instance.remoteZedcode.mode === 'managed' && !session.instance.remoteZedcode.keepRunning) {
         await this.stopRemoteServerBestEffort(session.parsed, session.controlPath, session.remotePort);
       }
       await this.stopControlMasterBestEffort(session.parsed, session.controlPath);
@@ -1310,7 +1310,7 @@ export class ElectronSshManager {
 
     const localUrl = `http://127.0.0.1:${localPort}`;
     const label = instance.nickname?.trim() || parsed.destination || id;
-    const clientToken = await this.issueClientToken(localUrl, this.configuredOpenChamberPassword(instance));
+    const clientToken = await this.issueClientToken(localUrl, this.configuredZedCodePassword(instance));
     await this.updateHostRuntime(id, label, localUrl, clientToken);
     if (instance.localForward?.preferredLocalPort !== localPort) {
       await this.persistLocalPort(id, localPort);

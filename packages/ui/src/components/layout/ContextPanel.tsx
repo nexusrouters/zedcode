@@ -785,7 +785,7 @@ export const ContextPanel: React.FC = () => {
 
       frameWindow.postMessage(
         {
-          type: 'openchamber:theme-sync',
+          type: 'zedcode:theme-sync',
           payload,
         },
         window.location.origin,
@@ -801,7 +801,7 @@ export const ContextPanel: React.FC = () => {
       const frameWindow = frame.contentWindow;
       if (!frameWindow) continue;
 
-      frameWindow.postMessage({ type: 'openchamber:chat-settings-sync', payload }, window.location.origin);
+      frameWindow.postMessage({ type: 'zedcode:chat-settings-sync', payload }, window.location.origin);
     }
   }, [allowPromptingSubagentSessions]);
 
@@ -862,8 +862,8 @@ export const ContextPanel: React.FC = () => {
         const payload: EmbeddedSessionRuntimeBootstrap = {
           apiBaseUrl: getRuntimeApiBaseUrl(),
           clientToken: getRuntimeBearerTokenSync(),
-          localOrigin: typeof window.__OPENCHAMBER_LOCAL_ORIGIN__ === 'string'
-            ? window.__OPENCHAMBER_LOCAL_ORIGIN__
+          localOrigin: typeof window.__ZEDCODE_LOCAL_ORIGIN__ === 'string'
+            ? window.__ZEDCODE_LOCAL_ORIGIN__
             : '',
           runtimeHeaders: getRuntimeExtraHeadersSync(),
           relayHostId: runtimeKey.startsWith('host:') ? runtimeKey.slice('host:'.length) : '',
@@ -876,15 +876,15 @@ export const ContextPanel: React.FC = () => {
         }, event.origin);
         return;
       }
-      if (data?.type === 'openchamber:theme-sync-request') {
+      if (data?.type === 'zedcode:theme-sync-request') {
         postThemeSyncToEmbeddedChat();
         return;
       }
-      if (data?.type === 'openchamber:chat-settings-request') {
+      if (data?.type === 'zedcode:chat-settings-request') {
         postChatSettingsSyncToEmbeddedChat();
         return;
       }
-      if (data?.type !== 'openchamber:cycle-theme-request') {
+      if (data?.type !== 'zedcode:cycle-theme-request') {
         return;
       }
 

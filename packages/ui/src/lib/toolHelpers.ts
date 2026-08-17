@@ -187,15 +187,15 @@ const TOOL_METADATA: Record<string, ToolMetadata> = {
       ]
     },
 
-    openchamber: {
-      displayName: 'OpenChamber',
+    zedcode: {
+      displayName: 'ZedCode',
       category: 'system',
       outputLanguage: 'json',
       inputFields: []
     },
 
-    openchamber_web: {
-      displayName: 'OpenChamber Web',
+    zedcode_web: {
+      displayName: 'ZedCode Web',
       category: 'system',
       outputLanguage: 'json',
       inputFields: []

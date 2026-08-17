@@ -46,12 +46,12 @@ const claimNotification = (key: string): boolean => {
 };
 
 
-const getOpenChamberConfigDir = (): string => {
+const getZedCodeConfigDir = (): string => {
   if (process.platform === 'win32') {
     const appData = process.env.APPDATA;
-    if (appData) return path.join(appData, 'openchamber');
+    if (appData) return path.join(appData, 'zedcode');
   }
-  return path.join(os.homedir(), '.config', 'openchamber');
+  return path.join(os.homedir(), '.config', 'zedcode');
 };
 
 const sanitizeInstallScope = (scope: string): 'vscode' | 'web' => {
@@ -60,7 +60,7 @@ const sanitizeInstallScope = (scope: string): 'vscode' | 'web' => {
 };
 
 const getOrCreateInstallId = (scope: string): string => {
-  const configDir = getOpenChamberConfigDir();
+  const configDir = getZedCodeConfigDir();
   const normalizedScope = sanitizeInstallScope(scope);
   const idPath = path.join(configDir, `install-id-${normalizedScope}`);
 
@@ -99,7 +99,7 @@ type ParsedDiffHunk = {
   newLines: string[];
 };
 
-const VIRTUAL_DIFF_SCHEME = 'openchamber-diff';
+const VIRTUAL_DIFF_SCHEME = 'zedcode-diff';
 const virtualDiffContents = new Map<string, string>();
 let virtualDiffCounter = 0;
 let virtualDiffProviderDisposable: vscode.Disposable | null = null;
@@ -298,7 +298,7 @@ export async function handleSystemBridgeMessage(
       return { id, type, success: true, data: { models } };
     }
 
-    case 'api:openchamber:update-check': {
+    case 'api:zedcode:update-check': {
       try {
         const body = (payload && typeof payload === 'object' ? payload : {}) as Record<string, unknown>;
         const currentVersion = typeof body.currentVersion === 'string' && body.currentVersion.trim().length > 0

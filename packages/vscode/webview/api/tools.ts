@@ -1,5 +1,5 @@
-import type { ToolsAPI } from '@openchamber/ui/lib/api/types';
-import { opencodeClient } from '@openchamber/ui/lib/opencode/client';
+import type { ToolsAPI } from '@zedcode/ui/lib/api/types';
+import { opencodeClient } from '@zedcode/ui/lib/opencode/client';
 
 export const createVSCodeToolsAPI = (): ToolsAPI => ({
   async getAvailableTools(): Promise<string[]> {
