@@ -66,6 +66,12 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Prebuild macOS universal CLI sidecars (both arches)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          ZEDCODE_CLI_TARGET=aarch64-apple-darwin pnpm build:cli
+          ZEDCODE_CLI_TARGET=x86_64-apple-darwin pnpm build:cli
+
       - name: Build and release Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
