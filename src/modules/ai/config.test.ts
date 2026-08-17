@@ -6,11 +6,14 @@ import {
   endpointIdFromCompatModel,
   getModelContextLimit,
   isCompatModelId,
+  isZedcodeDynamicModelId,
   migrateLegacyCompatEndpoint,
   modelKeepsReasoning,
   modelSupportsTemperature,
   modelUsesReasoningTokens,
   resolveModel,
+  setZedcodeDynamicModelIds,
+  zedcodeModelsToInfos,
   type CustomEndpoint,
 } from "./config";
 
@@ -55,6 +58,38 @@ describe("resolveModel", () => {
 
   it("throws on an unknown static model id", () => {
     expect(() => resolveModel("nope-not-real")).toThrow();
+  });
+});
+
+describe("dynamic ZedCode models", () => {
+  it("does not treat the static sentinel as a dynamic model", () => {
+    setZedcodeDynamicModelIds(["gpt-4o"]);
+    expect(isZedcodeDynamicModelId("zedcode-auto")).toBe(false);
+  });
+
+  it("recognises a registered plan model id and resolves it to the zedcode provider", () => {
+    setZedcodeDynamicModelIds(["gpt-4o", "claude-sonnet-5"]);
+    expect(isZedcodeDynamicModelId("gpt-4o")).toBe(true);
+    const info = resolveModel("gpt-4o");
+    expect(info.provider).toBe("zedcode");
+    expect(info.id).toBe("gpt-4o");
+  });
+
+  it("stops recognising an id once it drops out of the plan", () => {
+    setZedcodeDynamicModelIds(["gpt-4o"]);
+    setZedcodeDynamicModelIds([]);
+    expect(isZedcodeDynamicModelId("gpt-4o")).toBe(false);
+    expect(() => resolveModel("gpt-4o")).toThrow();
+  });
+
+  it("maps the fetched plan list to zedcode ModelInfo entries", () => {
+    const infos = zedcodeModelsToInfos([
+      { id: "gpt-4o" },
+      { id: "claude-sonnet-5", label: "Claude Sonnet 5" },
+    ]);
+    expect(infos).toHaveLength(2);
+    expect(infos[0]).toMatchObject({ id: "gpt-4o", provider: "zedcode" });
+    expect(infos[1].label).toBe("Claude Sonnet 5");
   });
 });
 

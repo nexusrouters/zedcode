@@ -54,6 +54,7 @@ import {
   providerNeedsKey,
   PROVIDERS,
   STT_PROVIDER_LABELS,
+  zedcodeModelsToInfos,
   type ModelCapabilities,
   type ModelId,
   type ModelInfo,
@@ -62,6 +63,7 @@ import {
 import { ACCEPTED_FILES, useComposer } from "../lib/composer";
 import { toggleFavoriteModel } from "../lib/modelPrefs";
 import { useChatStore } from "../store/chatStore";
+import { useZedcodeModelsStore } from "../store/zedcodeModelsStore";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 
 const PROVIDER_ICON = {
@@ -261,6 +263,13 @@ function ModelDropdown() {
     );
   }, [customEndpoints]);
 
+  // Dynamic ZedCode plan models (fetched from /v1/models after login).
+  const zedcodeModels = useZedcodeModelsStore((s) => s.models);
+  const zedcodeModelInfos = useMemo(
+    () => zedcodeModelsToInfos(zedcodeModels),
+    [zedcodeModels],
+  );
+
   const sortedProviders = useMemo(() => {
     const configured: (typeof PROVIDERS)[number][] = [];
     const unconfigured: (typeof PROVIDERS)[number][] = [];
@@ -273,8 +282,8 @@ function ModelDropdown() {
   }, [apiKeys]);
 
   const allModels = useMemo(
-    () => [...MODELS, ...epModelInfos],
-    [epModelInfos],
+    () => [...MODELS, ...zedcodeModelInfos, ...epModelInfos],
+    [zedcodeModelInfos, epModelInfos],
   );
 
   const COMPAT_PROVIDER_ID = "__compat__";

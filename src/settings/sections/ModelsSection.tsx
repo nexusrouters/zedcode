@@ -39,6 +39,7 @@ import {
   STT_PROVIDER_LABELS,
   type SttProvider,
   WHISPERCPP_DEFAULT_BASE_URL,
+  zedcodeModelsToInfos,
 } from "@/modules/ai/config";
 import {
   type CustomEndpointKeys,
@@ -56,6 +57,7 @@ import {
   type DeviceCodeResponse,
 } from "@/modules/ai/lib/zedcodeAuth";
 import { useChatStore } from "@/modules/ai/store/chatStore";
+import { useZedcodeModelsStore } from "@/modules/ai/store/zedcodeModelsStore";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import {
   type AutocompleteTrigger,
@@ -92,6 +94,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { invoke } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useEffect, useMemo, useState } from "react";
 import { ProviderIcon } from "../components/ProviderIcon";
@@ -160,6 +163,12 @@ export function ModelsSection() {
 
   useEffect(() => {
     void isZedcodeLoggedIn().then(setZedcodeLoggedIn);
+  }, []);
+
+  // The Settings window is its own webview and does not run useAiBootstrap, so
+  // it must hydrate the dynamic ZedCode model store itself for the pickers.
+  useEffect(() => {
+    void useZedcodeModelsStore.getState().hydrate();
   }, []);
 
   const defaultModel = usePreferencesStore((s) => s.defaultModelId);
@@ -463,6 +472,12 @@ function ZedcodeCard({
     setBusy(true);
     setError(null);
     setCode(null);
+    // The verification page opens in the browser; drop always-on-top so the
+    // settings window stops covering it (the Approve button was hidden).
+    const win = getCurrentWindow();
+    try {
+      await win.setAlwaysOnTop(false);
+    } catch {}
     try {
       const res = await startDeviceLogin({ onCode: setCode });
       if (res.ok) {
@@ -483,6 +498,9 @@ function ZedcodeCard({
     } finally {
       setBusy(false);
       setCode(null);
+      try {
+        await win.setAlwaysOnTop(true);
+      } catch {}
     }
   };
 
@@ -629,6 +647,15 @@ function DefaultModelPicker({
 }) {
   const m = getModel(defaultModel);
   const hasAny = configuredIds.size > 0;
+  const zedcodeModels = useZedcodeModelsStore((s) => s.models);
+  const zedcodeDynamic = useMemo(
+    () => zedcodeModelsToInfos(zedcodeModels),
+    [zedcodeModels],
+  );
+  const modelsForProvider = (id: ProviderId) => {
+    const base = MODELS.filter((x) => x.provider === id);
+    return id === "zedcode" ? [...base, ...zedcodeDynamic] : base;
+  };
 
   return (
     <DropdownMenu>
@@ -660,7 +687,7 @@ function DefaultModelPicker({
       >
         <div className="max-h-72 overflow-y-auto overscroll-contain pr-1">
           {PROVIDERS.filter((p) => configuredIds.has(p.id)).map((p) => {
-            const models = MODELS.filter((x) => x.provider === p.id);
+            const models = modelsForProvider(p.id);
             if (models.length === 0) return null;
             return (
               <div key={p.id} className="px-1 pt-1.5 first:pt-1">
@@ -731,6 +758,13 @@ function AutocompleteRow({
     [customEndpoints],
   );
 
+  // Dynamic ZedCode plan models (fetched from /v1/models after login).
+  const zedcodeModels = useZedcodeModelsStore((s) => s.models);
+  const zedcodeDynamic = useMemo(
+    () => zedcodeModelsToInfos(zedcodeModels),
+    [zedcodeModels],
+  );
+
   // Fast cloud tiers + configured local providers + named compat endpoints.
   const items = useMemo(() => {
     const local = PROVIDERS.filter(
@@ -742,8 +776,9 @@ function AutocompleteRow({
       const m = MODELS.find((x) => x.provider === p.id);
       return m ? [m] : [];
     });
-    return [...eligible, ...local, ...compatItems];
-  }, [eligible, configuredIds, compatItems]);
+    const zed = configuredIds.has("zedcode") ? zedcodeDynamic : [];
+    return [...eligible, ...local, ...zed, ...compatItems];
+  }, [eligible, configuredIds, compatItems, zedcodeDynamic]);
 
   const currentModel = useMemo(() => {
     if (provider === "openai-compatible" && isCompatModelId(modelId)) {

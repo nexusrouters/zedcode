@@ -120,6 +120,52 @@ export const MODELS = [
 
 export type ModelId = (typeof MODELS)[number]["id"];
 
+/** The routing sentinel that maps to "let the server pick a plan model". */
+export const ZEDCODE_AUTO_MODEL_ID = "zedcode-auto";
+
+// ── Dynamic ZedCode models ────────────────────────────────────────────────
+// After device-flow login the app fetches the model list the user's Coding
+// Plan grants (see `fetchZedcodeModels`). Those ids are not part of the static
+// `MODELS` registry — they live only at runtime. `resolveModel`/`getModel`
+// need to recognise them so the picker and the agent transport can treat a
+// server model id (e.g. "gpt-4o") as a first-class zedcode model without
+// forcing it to become a `ModelId`. The store publishes the live set here.
+const zedcodeDynamicModelIds = new Set<string>();
+
+/** Publish the current set of dynamic ZedCode model ids (called by the store). */
+export function setZedcodeDynamicModelIds(ids: readonly string[]): void {
+  zedcodeDynamicModelIds.clear();
+  for (const id of ids) if (id) zedcodeDynamicModelIds.add(id);
+}
+
+/** Whether `id` is a live dynamic ZedCode model (not the static sentinel). */
+export function isZedcodeDynamicModelId(id: string): boolean {
+  return id !== ZEDCODE_AUTO_MODEL_ID && zedcodeDynamicModelIds.has(id);
+}
+
+/** Build a `ModelInfo` for a dynamic ZedCode model id from the plan list. */
+export function zedcodeDynamicModelInfo(
+  id: string,
+  label?: string,
+): ModelInfo {
+  return {
+    id,
+    provider: "zedcode",
+    label: label || id,
+    hint: "Plan",
+    description: "ZedCode Coding Plan model.",
+    capabilities: { intelligence: 4, speed: 3, cost: 3 },
+    tags: ["tools"],
+  };
+}
+
+/** Convert the fetched plan model list to `ModelInfo[]` for the pickers. */
+export function zedcodeModelsToInfos(
+  models: readonly { id: string; label?: string }[],
+): ModelInfo[] {
+  return models.map((m) => zedcodeDynamicModelInfo(m.id, m.label));
+}
+
 export function getCompatModelInfo(
   modelId: string,
   endpoints: readonly CustomEndpoint[],
@@ -145,16 +191,23 @@ export function resolveModel(
 ): ModelInfo {
   if (isCompatModelId(modelId)) return getCompatModelInfo(modelId, endpoints);
   const m = MODELS.find((x) => x.id === modelId);
-  if (!m) throw new Error(`Unknown model: ${modelId}`);
-  return m;
+  if (m) return m;
+  // A dynamic ZedCode plan model (fetched from /v1/models after login) is not
+  // in the static registry, but it is a real, routable model.
+  if (isZedcodeDynamicModelId(modelId)) return zedcodeDynamicModelInfo(modelId);
+  throw new Error(`Unknown model: ${modelId}`);
 }
 
-export function getModel(id: ModelId): ModelInfo {
+export function getModel(id: ModelId | string): ModelInfo {
   const m = MODELS.find((x) => x.id === id);
+  if (m) return m;
+  // A dynamic ZedCode plan model resolves to its own info rather than the
+  // fallback, so the picker trigger shows the model the user actually picked.
+  if (isZedcodeDynamicModelId(id)) return zedcodeDynamicModelInfo(id);
   // A previously-persisted model id may no longer exist in the catalog
   // (e.g. after switching to a single provider). Fall back to the default
   // instead of throwing, which would blank the whole settings panel.
-  return m ?? MODELS.find((x) => x.id === DEFAULT_MODEL_ID) ?? MODELS[0];
+  return MODELS.find((x) => x.id === DEFAULT_MODEL_ID) ?? MODELS[0];
 }
 
 export function isKnownModelId(id: string): id is ModelId {
