@@ -33,6 +33,7 @@ import {
   type OAuthAuthMethodEntry,
 } from './providerAuth';
 import { CustomProviderForm } from './CustomProviderForm';
+import { ZedCodeLogin } from './ZedCodeLogin';
 import { ProviderOAuthMethods, type ProviderOAuthMethod } from './ProviderOAuthMethods';
 import {
   buildAuthSetRequest,
@@ -536,6 +537,9 @@ export const ProvidersPage: React.FC = () => {
         title={t('settings.providers.page.connect.title')}
         showSaveStatus={false}
       >
+        <div className="mb-4">
+          <ZedCodeLogin />
+        </div>
         <SettingsSection
           title={t('settings.providers.page.connect.selectProviderTitle')}
           divider={false}

@@ -4,6 +4,7 @@ import { stripAppImageArgv0Leak } from '../inherited-env.js';
 import { registerManagedProcess, unregisterManagedProcess, reapOrphanedProcesses } from './managed-process-registry.js';
 import { applyProviderEnvAliases } from './provider-env-aliases.js';
 import { recordStartupPerformance } from './startup-performance.js';
+import { syncZedmux } from '../zedcode/zedcode-auth.js';
 
 const parsePositiveInt = (value, fallback) => {
   const parsed = Number.parseInt(String(value ?? ''), 10);
@@ -521,6 +522,15 @@ export const createOpenCodeLifecycleRuntime = (deps) => {
       totalDurationMs: performance.now() - attemptStartedAt,
     });
     phaseStartedAt = performance.now();
+
+    // Inject the ZedCode/zedmux provider + credential into OpenCode config
+    // before launching, so a logged-in user's session is wired into the agent
+    // without a manual provider setup step. Best-effort; never blocks startup.
+    try {
+      await syncZedmux();
+    } catch (zedcodeError) {
+      console.warn('[ZedCode] pre-launch sync failed:', zedcodeError?.message || zedcodeError);
+    }
 
     try {
       const serverInstance = await createManagedOpenCodeServerProcess({
