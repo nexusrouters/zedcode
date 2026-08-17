@@ -74,9 +74,9 @@ export function migrateLegacyCompatEndpoint(
 }
 
 export function getProvider(id: ProviderId): ProviderInfo {
-  const p = PROVIDERS.find((x) => x.id === id);
-  if (!p) throw new Error(`Unknown provider: ${id}`);
-  return p;
+  // A stale persisted provider id (e.g. after switching to a single provider)
+  // must not throw — that would blank whatever panel renders it. Fall back.
+  return PROVIDERS.find((x) => x.id === id) ?? PROVIDERS[0];
 }
 
 /** 1 (lowest) – 5 (highest). For `cost`, higher = cheaper. */

@@ -326,7 +326,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   restoreWindowState: true,
   autocompleteEnabled: false,
   autocompleteTrigger: "auto",
-  autocompleteProvider: "cerebras",
+  autocompleteProvider: "zedcode",
   autocompleteModelId: DEFAULT_AUTOCOMPLETE_MODEL.cerebras ?? "",
   lmstudioBaseURL: LMSTUDIO_DEFAULT_BASE_URL,
   lmstudioModelId: "",
