@@ -707,7 +707,11 @@ function AutocompleteRow({
   const trigger = usePreferencesStore((s) => s.autocompleteTrigger);
   const provider = usePreferencesStore((s) => s.autocompleteProvider);
   const modelId = usePreferencesStore((s) => s.autocompleteModelId);
-  const eligible = useMemo(() => getAutocompleteEligibleModels(), []);
+  const eligible = useMemo(() => {
+    const list = getAutocompleteEligibleModels();
+    // Never empty: the row renders currentModel.* unconditionally.
+    return list.length > 0 ? list : MODELS;
+  }, []);
   const userShortcuts = usePreferencesStore((s) => s.shortcuts);
   const aiCompleteShortcut = useMemo(() => {
     const s = SHORTCUTS.find((x) => x.id === "editor.aiComplete");
@@ -746,12 +750,15 @@ function AutocompleteRow({
       return getCompatModelInfo(modelId, customEndpoints);
     }
     if (isLocalProvider(provider)) {
-      return MODELS.find((m) => m.provider === provider) ?? eligible[0];
+      return (
+        MODELS.find((m) => m.provider === provider) ?? eligible[0] ?? MODELS[0]
+      );
     }
     return (
       MODELS.find((m) => m.provider === provider && m.id === modelId) ??
       MODELS.find((m) => m.id === modelId) ??
-      eligible[0]
+      eligible[0] ??
+      MODELS[0]
     );
   }, [eligible, provider, modelId, customEndpoints]);
 
