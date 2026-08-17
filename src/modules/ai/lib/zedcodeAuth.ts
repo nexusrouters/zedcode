@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { KEYRING_SERVICE } from "../config";
+import { proxyFetch } from "./proxyFetch";
 
 /**
  * ZedCode OAuth Device Flow + JWT auto-refresh.
@@ -16,6 +17,9 @@ import { KEYRING_SERVICE } from "../config";
  *   POST /auth/device/refresh { refresh_token }            -> rotated tokens | 401/403 (must re-login)
  */
 
+// Auth (device flow) lives on the main domain; the OpenAI-compatible /v1 API
+// lives on the api subdomain. They are DIFFERENT hosts.
+export const ZEDCODE_AUTH_BASE = "https://zedmux.tech";
 export const ZEDCODE_API_BASE = "https://api.zedmux.tech";
 export const ZEDCODE_V1_BASE = `${ZEDCODE_API_BASE}/v1`;
 const CLIENT_ID = "zedcode";
@@ -85,7 +89,7 @@ async function postJson<T>(path: string, body: unknown): Promise<{
   status: number;
   data: T;
 }> {
-  const res = await fetch(`${ZEDCODE_API_BASE}${path}`, {
+  const res = await proxyFetch(`${ZEDCODE_AUTH_BASE}${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -253,7 +257,7 @@ export async function fetchZedcodeModels(): Promise<ZedcodeModel[]> {
   const token = await getValidAccessToken();
   if (!token) return [];
   try {
-    const res = await fetch(`${ZEDCODE_V1_BASE}/models`, {
+    const res = await proxyFetch(`${ZEDCODE_V1_BASE}/models`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) return [];

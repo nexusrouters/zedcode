@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useUpdater } from "@/modules/updater";
-import { GithubIcon, Globe02Icon } from "@hugeicons/core-free-icons";
+import { Globe02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { getName, getVersion } from "@tauri-apps/api/app";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -8,7 +8,6 @@ import { arch, platform } from "@tauri-apps/plugin-os";
 import { useEffect, useState } from "react";
 import { SectionHeader } from "../components/SectionHeader";
 
-const REPO_URL = "https://github.com/nexusrouters/zedcode";
 const WEBSITE = "https://zedcode.app";
 
 const PLATFORM_LABEL: Record<string, string> = {
@@ -75,7 +74,7 @@ export function AboutSection() {
             {name}
           </span>
           <span className="text-[11px] text-muted-foreground">
-            Open-source AI-native terminal emulator
+            AI-native terminal emulator
           </span>
           <span className="mt-1 font-mono text-[11px] text-muted-foreground">
             v{version || "—"}
@@ -92,20 +91,6 @@ export function AboutSection() {
         <dt className="text-muted-foreground">Bundle ID</dt>
         <dd className="font-mono text-[11.5px]">tech.zedmux.zedcode</dd>
 
-        <dt className="text-muted-foreground">License</dt>
-        <dd>Apache 2.0</dd>
-
-        <dt className="text-muted-foreground">Source code</dt>
-        <dd>
-          <button
-            type="button"
-            onClick={() => void openUrl(REPO_URL)}
-            className="inline-flex items-center gap-1.5 rounded-md text-[12px] underline-offset-2 hover:text-foreground hover:underline"
-          >
-            <HugeiconsIcon icon={GithubIcon} size={12} strokeWidth={1.75} />
-            nexusrouters/zedcode
-          </button>
-        </dd>
         <dt className="text-muted-foreground">Website</dt>
         <dd>
           <button
@@ -127,22 +112,6 @@ export function AboutSection() {
             disabled={checking || downloading || ready}
           >
             {checkLabel}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => void openUrl(REPO_URL)}
-            className="gap-1.5"
-          >
-            <HugeiconsIcon icon={GithubIcon} size={12} strokeWidth={1.75} />
-            View on GitHub
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => void openUrl(`${REPO_URL}/issues/new`)}
-          >
-            Report an issue
           </Button>
         </div>
         {status.kind === "error" && (
