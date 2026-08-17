@@ -23,7 +23,7 @@ const byId = (id: string) => {
 
 describe("a pinned tool choice is only sent where it is accepted", () => {
   it("is withheld from the model that reported the failure", () => {
-    expect(modelAllowsForcedToolChoice(byId("deepseek-v4-flash"))).toBe(false);
+    expect(modelAllowsForcedToolChoice(byId("zedcode-auto"))).toBe(false);
   });
 
   it("is withheld from every reasoning-tagged model", () => {
@@ -34,12 +34,18 @@ describe("a pinned tool choice is only sent where it is accepted", () => {
     }
   });
 
-  it("is still sent to models that take it", () => {
-    const plain = ALL.filter((m) => !m.tags?.includes("reasoning"));
-    expect(plain.length).toBeGreaterThan(0);
-    for (const m of plain) {
-      expect(modelAllowsForcedToolChoice(m), m.id).toBe(true);
-    }
+  it("is still sent to a plain (non-reasoning) model", () => {
+    // The catalog ships only reasoning-tagged models now, so build a plain one
+    // to prove the function still permits a forced tool choice for it.
+    const plain: ModelInfo = {
+      id: "plain-test-model",
+      provider: "openai-compatible",
+      label: "Plain",
+      hint: "Test",
+      description: "Synthetic plain model for the test.",
+      capabilities: { intelligence: 3, speed: 4, cost: 3 },
+    };
+    expect(modelAllowsForcedToolChoice(plain)).toBe(true);
   });
 
   // These answer different questions - what the history keeps, and what the
