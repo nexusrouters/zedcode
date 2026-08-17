@@ -15,8 +15,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: macos-latest
-            args: "--target universal-apple-darwin"
           - platform: ubuntu-22.04
             args: ""
           - platform: windows-latest
@@ -55,8 +53,6 @@ jobs:
 
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
@@ -65,12 +61,6 @@ jobs:
 
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Prebuild macOS universal CLI sidecars (both arches)
-        if: matrix.platform == 'macos-latest'
-        run: |
-          ZEDCODE_CLI_TARGET=aarch64-apple-darwin pnpm build:cli
-          ZEDCODE_CLI_TARGET=x86_64-apple-darwin pnpm build:cli
 
       - name: Build and release Tauri app
         uses: tauri-apps/tauri-action@v0
