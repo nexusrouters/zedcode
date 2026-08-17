@@ -1,6 +1,6 @@
 [package]
 name = "zedcode"
-version = "0.1.10"
+version = "0.1.11"
 description = "ZedCode — an open-source AI-native terminal emulator"
 authors = ["nexusrouters"]
 license = "Apache-2.0"
@@ -13,7 +13,7 @@ default-members = [".", "crates/zedcode-cli", "crates/zedcode-control-protocol"]
 resolver = "2"
 
 [workspace.package]
-version = "0.1.10"
+version = "0.1.11"
 edition = "2021"
 license = "Apache-2.0"
 

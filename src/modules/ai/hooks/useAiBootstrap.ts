@@ -55,7 +55,11 @@ export function useAiBootstrap(): {
     customEndpoints.some(
       (e) => e.baseURL.trim().length > 0 && e.modelId.trim().length > 0,
     );
-  const hasComposer = hasAnyKey(apiKeys) || hasLocalModel;
+  const zedcodeLoggedIn = useZedcodeModelsStore((s) => s.loggedIn);
+  // ZedCode signs in via the OAuth device flow (a stored token), not an API
+  // key, so the composer must appear when the user is logged in too — else the
+  // input box never shows and the panel looks unusable.
+  const hasComposer = hasAnyKey(apiKeys) || hasLocalModel || zedcodeLoggedIn;
 
   const prefsHydrated = usePreferencesStore((s) => s.hydrated);
   const [keysLoaded, setKeysLoaded] = useState(false);
