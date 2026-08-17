@@ -1,6 +1,6 @@
 {
   "name": "@zedcode/electron",
-  "version": "1.18.4",
+  "version": "0.2.0",
   "private": true,
   "description": "Electron desktop runtime for ZedCode",
   "author": "ZedCode",
