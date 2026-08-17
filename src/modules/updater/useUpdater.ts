@@ -1,8 +1,8 @@
 import { getVersion } from "@tauri-apps/api/app";
 import { relaunch } from "@tauri-apps/plugin-process";
-import { check, type Update } from "@tauri-apps/plugin-updater";
+import { type Update } from "@tauri-apps/plugin-updater";
 import { useCallback, useEffect, useState } from "react";
-import { IS_LINUX } from "@/lib/platform";
+import { proxyFetch } from "@/modules/ai/lib/proxyFetch";
 
 const LAST_CHECK_KEY = "zedcode:updater:last-check";
 const CHECK_INTERVAL_MS = 30 * 60 * 1000;
@@ -49,11 +49,13 @@ function isNewer(remote: string, current: string): boolean {
 async function checkLinuxRelease(): Promise<ManualUpdateInfo | null> {
   const [current, res] = await Promise.all([
     getVersion(),
-    fetch(GITHUB_LATEST_RELEASE, {
+    proxyFetch(GITHUB_LATEST_RELEASE, {
       headers: { Accept: "application/vnd.github+json" },
     }),
   ]);
   if (!res.ok) {
+    // 404 simply means no published (non-draft) release exists yet.
+    if (res.status === 404) return null;
     throw new Error(`GitHub API ${res.status}`);
   }
   const data = (await res.json()) as {
@@ -91,23 +93,17 @@ export function useUpdater({ autoCheck = true }: HookOptions = {}) {
     }
     setStatus({ kind: "checking" });
     try {
-      if (IS_LINUX) {
-        const info = await checkLinuxRelease();
-        if (info) {
-          setStatus({ kind: "manual-available", info });
-        } else {
-          localStorage.setItem(LAST_CHECK_KEY, String(Date.now()));
-          setStatus({ kind: "uptodate" });
-        }
-        return;
-      }
-      const update = await check();
-      if (update) {
-        setStatus({ kind: "available", update });
+      // Signed auto-update artifacts (latest.json) are not published, so every
+      // platform uses the manual path: detect a newer release via the GitHub
+      // API and offer to open the download page.
+      const info = await checkLinuxRelease();
+      if (info) {
+        setStatus({ kind: "manual-available", info });
       } else {
         localStorage.setItem(LAST_CHECK_KEY, String(Date.now()));
         setStatus({ kind: "uptodate" });
       }
+      return;
     } catch (err) {
       setStatus({ kind: "error", message: String(err) });
     }
