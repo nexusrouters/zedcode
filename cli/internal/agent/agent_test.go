@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/99apps-id/termigo/cli/internal/config"
+	"github.com/nexusrouters/zedcode/cli/internal/config"
 )
 
 func TestDetectWithoutProvidersIsGraceful(t *testing.T) {

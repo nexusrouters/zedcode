@@ -39,7 +39,7 @@ You are the orchestrator, not the implementer. Do not write the code yourself.
 Sharpen vague requests into precise engineering instructions; keep each agent prompt focused on one coherent unit of work.`;
 }
 
-const INIT_PROMPT = `Scan this workspace and produce TERMIGO.md at the workspace root with:
+const INIT_PROMPT = `Scan this workspace and produce ZEDCODE.md at the workspace root with:
 
 - One-paragraph project description.
 - Build / test / dev commands.
@@ -47,7 +47,7 @@ const INIT_PROMPT = `Scan this workspace and produce TERMIGO.md at the workspace
 - Conventions worth knowing (naming, patterns, gotchas).
 - Paths to entry points.
 
-Use grep/glob/list_directory/read_file to explore. Cap TERMIGO.md under 200 lines. Use write_file to create it (will go through normal approval).`;
+Use grep/glob/list_directory/read_file to explore. Cap ZEDCODE.md under 200 lines. Use write_file to create it (will go through normal approval).`;
 
 export type SlashCommandMeta = {
   name: string;
@@ -89,11 +89,11 @@ export const SLASH_COMMANDS: Record<string, SlashCommandMeta> = {
   },
 };
 
-export const TERMIGO_CMD_RE =
-  /^<termigo-command\s+name="([a-z0-9-]+)"(?:\s+state="([a-z]+)")?\s*\/>(?:\n+|$)/;
+export const ZEDCODE_CMD_RE =
+  /^<zedcode-command\s+name="([a-z0-9-]+)"(?:\s+state="([a-z]+)")?\s*\/>(?:\n+|$)/;
 
 export function wrapWithCommandMarker(prompt: string, name: string): string {
-  return `<termigo-command name="${name}" />\n\n${prompt}`;
+  return `<zedcode-command name="${name}" />\n\n${prompt}`;
 }
 
 export function tryRunSlashCommand(input: string): SlashOutcome {

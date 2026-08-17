@@ -130,7 +130,7 @@ impl McpClient {
             json!({
                 "protocolVersion": PROTOCOL_VERSION,
                 "capabilities": {},
-                "clientInfo": { "name": "Termigo", "version": env!("CARGO_PKG_VERSION") },
+                "clientInfo": { "name": "ZedCode", "version": env!("CARGO_PKG_VERSION") },
             }),
             HANDSHAKE_TIMEOUT,
         );

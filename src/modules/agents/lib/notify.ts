@@ -28,7 +28,7 @@ export async function osNotify(
     sendNotification({ title, body });
     return "requested";
   } catch (e) {
-    console.warn("[termigo] os notification failed:", e);
+    console.warn("[zedcode] os notification failed:", e);
     return "failed";
   }
 }

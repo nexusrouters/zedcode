@@ -3,7 +3,7 @@
 //! Mirrors the local PTY module's command shape (`ssh_open`/`ssh_write`/
 //! `ssh_resize`/`ssh_close`) so the frontend can swap a local PTY for a
 //! remote shell with minimal plumbing. Auth supports the local ssh-agent (the
-//! private key stays inside the agent; Termigo only ever sees signatures), a
+//! private key stays inside the agent; ZedCode only ever sees signatures), a
 //! private key, or a password.
 //! Host-key handling: SHA-256 fingerprint pinning. The first connect to
 //! a new host is trust-on-first-use (the seen fingerprint is reported to the
@@ -36,7 +36,7 @@ fn ssh_runtime() -> &'static Runtime {
         tokio::runtime::Builder::new_multi_thread()
             .worker_threads(2)
             .enable_all()
-            .thread_name("termigo-ssh")
+            .thread_name("zedcode-ssh")
             .build()
             .expect("init ssh tokio runtime")
     })
@@ -89,7 +89,7 @@ pub struct SshOpenInput {
     pub port: u16,
     pub user: String,
     /// Authenticate through the local ssh-agent: the agent signs the handshake
-    /// and the private key never reaches Termigo. One of this, `password` or
+    /// and the private key never reaches ZedCode. One of this, `password` or
     /// `private_key` must be set.
     #[serde(default)]
     pub use_agent: bool,
@@ -114,7 +114,7 @@ pub struct SshOpenInput {
 }
 
 /// One key the local ssh-agent is holding. Read-only: the agent never hands out
-/// the private half, so this is everything Termigo can know about it.
+/// the private half, so this is everything ZedCode can know about it.
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SshAgentKey {

@@ -258,7 +258,7 @@ function AddServerForm({ onAdded }: { onAdded: () => void }) {
         </Button>
       </div>
       <p className="text-[10px] text-muted-foreground">
-        Saved to ~/.termigo/mcp.json, so it applies to every project. Test it
+        Saved to ~/.zedcode/mcp.json, so it applies to every project. Test it
         below once saved.
       </p>
     </div>
@@ -318,7 +318,7 @@ export function McpSection() {
         <div className="flex flex-col gap-2">
           <p className="text-[12px] text-muted-foreground">
             No servers configured yet. Create{" "}
-            <code className="font-mono text-[11px]">~/.termigo/mcp.json</code>{" "}
+            <code className="font-mono text-[11px]">~/.zedcode/mcp.json</code>{" "}
             with the standard <code className="font-mono text-[11px]">mcpServers</code>{" "}
             shape:
           </p>
@@ -337,9 +337,9 @@ export function McpSection() {
       <div className="flex flex-col gap-1.5 rounded-md border border-border/60 bg-muted/20 p-3 text-[11px] text-muted-foreground">
         <p>
           This window has no active project, so only{" "}
-          <code className="font-mono">~/.termigo/mcp.json</code> is listed here.
+          <code className="font-mono">~/.zedcode/mcp.json</code> is listed here.
           Per-project servers in{" "}
-          <code className="font-mono">&lt;workspace&gt;/.termigo/mcp.json</code>{" "}
+          <code className="font-mono">&lt;workspace&gt;/.zedcode/mcp.json</code>{" "}
           are still picked up when the agent runs, and override a user entry of
           the same name.
         </p>

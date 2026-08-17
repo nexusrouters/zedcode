@@ -1,7 +1,7 @@
 //! MCP (Model Context Protocol) servers.
 //!
-//! Reads the standard `mcpServers` registry from `<workspace>/.termigo/mcp.json`
-//! merged with the user-level `~/.termigo/mcp.json`, and talks JSON-RPC 2.0
+//! Reads the standard `mcpServers` registry from `<workspace>/.zedcode/mcp.json`
+//! merged with the user-level `~/.zedcode/mcp.json`, and talks JSON-RPC 2.0
 //! over stdio to each server. This is the same registry shape and merge order
 //! the Go companion CLI uses, so a server configured for one works in the other.
 //!
@@ -21,7 +21,7 @@ use tokio::sync::Mutex as AsyncMutex;
 use client::{McpClient, McpTool};
 
 /// Project-scoped registry, relative to the workspace root.
-const WORKSPACE_REGISTRY: &str = ".termigo/mcp.json";
+const WORKSPACE_REGISTRY: &str = ".zedcode/mcp.json";
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ServerConfig {
@@ -76,10 +76,10 @@ fn read_registry(path: &Path, scope: &str, cwd: Option<&Path>) -> Vec<ServerConf
 }
 
 fn user_registry_path() -> Option<PathBuf> {
-    if let Ok(home) = std::env::var("TERMIGO_HOME") {
+    if let Ok(home) = std::env::var("ZEDCODE_HOME") {
         return Some(PathBuf::from(home).join("mcp.json"));
     }
-    dirs::home_dir().map(|dir| dir.join(".termigo").join("mcp.json"))
+    dirs::home_dir().map(|dir| dir.join(".zedcode").join("mcp.json"))
 }
 
 /// Edit the user-level registry in place, preserving entries this app does not
@@ -355,9 +355,9 @@ mod tests {
     use std::io::Write;
 
     fn write_registry(dir: &Path, body: &str) -> PathBuf {
-        let termigo = dir.join(".termigo");
-        std::fs::create_dir_all(&termigo).unwrap();
-        let path = termigo.join("mcp.json");
+        let zedcode = dir.join(".zedcode");
+        std::fs::create_dir_all(&zedcode).unwrap();
+        let path = zedcode.join("mcp.json");
         let mut file = std::fs::File::create(&path).unwrap();
         file.write_all(body.as_bytes()).unwrap();
         path

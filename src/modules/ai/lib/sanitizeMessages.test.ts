@@ -221,7 +221,7 @@ describe("sanitizeUiMessages: resumed sessions", () => {
 // to the model as interrupted, and the model tried again - a loop that left 56
 // calls stranded in `approval-responded`, 37 of them bash_run.
 describe("sanitizeUiMessages: the trailing env turn", () => {
-  const ENV = "<env>\nworkspace_root: C:/project/termigo\n</env>";
+  const ENV = "<env>\nworkspace_root: C:/project/zedcode\n</env>";
   const envTurn = () =>
     ({ id: "env", role: "user", parts: [{ type: "text", text: ENV }] }) as UIMessage;
 

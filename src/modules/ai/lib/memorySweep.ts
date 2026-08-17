@@ -2,7 +2,7 @@
 //
 // The `remember` tool captures facts the model thought to record mid-run. This
 // catches what it did not: when a session is left behind, the transcript is
-// summarised once and any durable facts are appended to .termigo/memory.md.
+// summarised once and any durable facts are appended to .zedcode/memory.md.
 //
 // It is deliberately conservative. A sweep costs a model call and writes
 // without anyone reading the result, so it only runs when there is enough

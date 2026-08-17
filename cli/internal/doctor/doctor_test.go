@@ -3,7 +3,7 @@ package doctor
 import "testing"
 
 func TestTrimVersion(t *testing.T) {
-	if got := trimVersion("  termigo 1.0.0\n"); got != "termigo 1.0.0" {
+	if got := trimVersion("  zedcode 1.0.0\n"); got != "zedcode 1.0.0" {
 		t.Fatalf("trimVersion() = %q", got)
 	}
 }

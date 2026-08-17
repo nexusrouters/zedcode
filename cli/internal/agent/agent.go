@@ -1,6 +1,6 @@
-// Package agent runs locally installed AI coding agents from the Termigo CLI.
+// Package agent runs locally installed AI coding agents from the ZedCode CLI.
 //
-// Termigo never stores provider credentials. Each provider is driven through
+// ZedCode never stores provider credentials. Each provider is driven through
 // its own installed CLI (or, for Ollama, its local HTTP endpoint) so that
 // authentication and key handling stay where the provider put them.
 package agent
@@ -17,7 +17,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/99apps-id/termigo/cli/internal/config"
+	"github.com/nexusrouters/zedcode/cli/internal/config"
 )
 
 // Provider describes one supported agent backend.
@@ -188,7 +188,7 @@ func cliArgs(providerID string, options RunOptions) ([]string, error) {
 		}
 		return args, nil
 	default:
-		return nil, fmt.Errorf("provider %q has no headless run mode yet; use 'termigo agent list' to see which providers can be driven from the CLI", providerID)
+		return nil, fmt.Errorf("provider %q has no headless run mode yet; use 'zedcode agent list' to see which providers can be driven from the CLI", providerID)
 	}
 }
 

@@ -1,5 +1,5 @@
 {
-  description = "Termigo - open-source lightweight cross-platform AI-native terminal (ADE)";
+  description = "ZedCode - open-source lightweight cross-platform AI-native terminal (ADE)";
 
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
@@ -9,16 +9,16 @@
     packages = forAllSystems (system: let
       pkgs = nixpkgs.legacyPackages.${system};
     in {
-      termigo = pkgs.callPackage ./nix/package.nix { };
-      default = self.packages.${system}.termigo;
+      zedcode = pkgs.callPackage ./nix/package.nix { };
+      default = self.packages.${system}.zedcode;
     });
 
-    nixosModules.termigo = { pkgs, ... }: {
-      environment.systemPackages = [ self.packages.${pkgs.system}.termigo ];
+    nixosModules.zedcode = { pkgs, ... }: {
+      environment.systemPackages = [ self.packages.${pkgs.system}.zedcode ];
     };
 
-    darwinModules.termigo = { pkgs, ... }: {
-      environment.systemPackages = [ self.packages.${pkgs.system}.termigo ];
+    darwinModules.zedcode = { pkgs, ... }: {
+      environment.systemPackages = [ self.packages.${pkgs.system}.zedcode ];
     };
   };
 }

@@ -92,7 +92,7 @@ async function respond(
     response,
   });
   if (!delivered) {
-    console.warn(`[termigo] control response expired: ${requestId}`);
+    console.warn(`[zedcode] control response expired: ${requestId}`);
   }
 }
 
@@ -130,7 +130,7 @@ export function useControlBridge({
               await window.setFocus();
               focused = true;
             } catch (error) {
-              console.warn("[termigo] could not focus control target:", error);
+              console.warn("[zedcode] could not focus control target:", error);
             }
           }
           const tabId = onOpen({ ...open, spaceId: context.space_id });
@@ -167,13 +167,13 @@ export function useControlBridge({
             : { code: "frontend_error", message: String(error) };
         await respond(request.id, { ok: false, error: responseError }).catch(
           (responseError) => {
-            console.error("[termigo] control response failed:", responseError);
+            console.error("[zedcode] control response failed:", responseError);
           },
         );
       }
     };
 
-    void listen<ControlRequest>("termigo:control-request", (event) => {
+    void listen<ControlRequest>("zedcode:control-request", (event) => {
       void handleRequest(event.payload);
     })
       .then((stop) => {
@@ -185,14 +185,14 @@ export function useControlBridge({
         return setFrontendReady(true);
       })
       .catch((error) => {
-        console.error("[termigo] control bridge setup failed:", error);
+        console.error("[zedcode] control bridge setup failed:", error);
       });
 
     return () => {
       disposed = true;
       unlisten?.();
       void setFrontendReady(false).catch((error) => {
-        console.error("[termigo] control bridge cleanup failed:", error);
+        console.error("[zedcode] control bridge cleanup failed:", error);
       });
     };
   }, [ready, tabsRef, activeTabIdRef, activeSpaceIdRef, onOpen]);

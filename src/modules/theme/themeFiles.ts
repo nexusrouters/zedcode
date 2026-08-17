@@ -5,8 +5,8 @@ import { appConfigDir, join } from "@tauri-apps/api/path";
 import type { Theme } from "./types";
 import { validateTheme, type ValidationResult } from "./validateTheme";
 
-const THEME_FILE_EXT = ".termigo-theme";
-const THEME_EDIT_EVENT = "termigo://theme-edit";
+const THEME_FILE_EXT = ".zedcode-theme";
+const THEME_EDIT_EVENT = "zedcode://theme-edit";
 
 export type ThemeEditRequest =
   | { action: "create" }

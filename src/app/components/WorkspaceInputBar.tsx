@@ -26,7 +26,7 @@ const AiComposerInput = lazy(() =>
   })),
 );
 
-export const TOGGLE_BLOCK_INPUT_EVENT = "termigo:toggle-block-input";
+export const TOGGLE_BLOCK_INPUT_EVENT = "zedcode:toggle-block-input";
 
 type Props = {
   isBlockTab: boolean;
@@ -185,7 +185,7 @@ export function WorkspaceInputBar({
     <div
       data-ai-input-bar
       data-state={open ? "open" : "closed"}
-      className="termigo-reveal"
+      className="zedcode-reveal"
       aria-hidden={!open}
     >
       <div>{content}</div>

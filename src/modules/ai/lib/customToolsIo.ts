@@ -55,7 +55,7 @@ export async function saveCustomTool(
   const next = upsertTool(existing, tool);
 
   try {
-    await native.createDir(`${workspaceRoot.replace(/[\\/]$/, "")}/.termigo`);
+    await native.createDir(`${workspaceRoot.replace(/[\\/]$/, "")}/.zedcode`);
   } catch {
     // Already there, or the write reports a clearer failure.
   }

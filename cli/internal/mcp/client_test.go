@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/99apps-id/termigo/cli/internal/config"
+	"github.com/nexusrouters/zedcode/cli/internal/config"
 )
 
 // TestHelperProcess acts as a fake MCP server when run as a subprocess.
@@ -145,7 +145,7 @@ func TestSilentHelperProcess(t *testing.T) {
 
 func TestRegistryMergeAndEdit(t *testing.T) {
 	workspace := t.TempDir()
-	project := filepath.Join(workspace, ".termigo", "mcp.json")
+	project := filepath.Join(workspace, ".zedcode", "mcp.json")
 	projectJSON := `{
   "mcpServers": {
     "project-server": {
@@ -161,8 +161,8 @@ func TestRegistryMergeAndEdit(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	home := filepath.Join(t.TempDir(), "termigo-home")
-	t.Setenv("TERMIGO_HOME", home)
+	home := filepath.Join(t.TempDir(), "zedcode-home")
+	t.Setenv("ZEDCODE_HOME", home)
 	user := filepath.Join(home, "mcp.json")
 	if err := os.MkdirAll(filepath.Dir(user), 0o755); err != nil {
 		t.Fatal(err)
@@ -229,7 +229,7 @@ func TestRegistryMergeAndEdit(t *testing.T) {
 
 func TestLoadRejectsServerWithoutCommand(t *testing.T) {
 	workspace := t.TempDir()
-	project := filepath.Join(workspace, ".termigo", "mcp.json")
+	project := filepath.Join(workspace, ".zedcode", "mcp.json")
 	if err := os.MkdirAll(filepath.Dir(project), 0o755); err != nil {
 		t.Fatal(err)
 	}

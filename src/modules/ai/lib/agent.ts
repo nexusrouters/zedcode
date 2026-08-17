@@ -221,7 +221,7 @@ export async function buildLanguageModel(
         baseURL: "https://openrouter.ai/api/v1",
         apiKey: key,
         headers: {
-          "HTTP-Referer": "https://termigo.ai",
+          "HTTP-Referer": "https://zedcode.ai",
           "X-Title": "ZedCode",
         },
         fetch: proxyFetch,
@@ -385,7 +385,7 @@ function buildStableSystem(
     : "";
   const memoryBlock =
     projectMemory && projectMemory.trim().length > 0
-      ? `\n\n## PROJECT — TERMIGO.md\n${projectMemory.trim()}`
+      ? `\n\n## PROJECT — ZEDCODE.md\n${projectMemory.trim()}`
       : "";
   // Skills sit after facts and before persona: the model should know what it
   // already knows how to do before it is told how to behave.
@@ -513,7 +513,7 @@ export type RunAgentOptions = {
   customEndpointKeys?: CustomEndpointKeys;
   planMode?: boolean;
   projectMemory?: string | null;
-  /** Facts the agent recorded in earlier sessions (.termigo/memory.md). */
+  /** Facts the agent recorded in earlier sessions (.zedcode/memory.md). */
   learnedMemory?: readonly MemoryEntry[];
   /**
    * Tools discovered from configured MCP servers. Passed in rather than built

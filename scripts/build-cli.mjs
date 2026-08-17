@@ -47,7 +47,7 @@ function requireArtifact(path, label) {
 }
 
 const target =
-  process.env.TERMIGO_CLI_TARGET?.trim() ||
+  process.env.ZEDCODE_CLI_TARGET?.trim() ||
   process.env.CARGO_BUILD_TARGET?.trim() ||
   hostTriple();
 const cargoArgs = [
@@ -56,9 +56,9 @@ const cargoArgs = [
   "--manifest-path",
   join(tauriDir, "Cargo.toml"),
   "--package",
-  "termigo-cli",
+  "zedcode-cli",
   "--bin",
-  "termigo-cli",
+  "zedcode-cli",
   "--target",
   target,
 ];
@@ -73,12 +73,12 @@ const source = join(
   "target",
   target,
   profile,
-  `termigo-cli${extension}`,
+  `zedcode-cli${extension}`,
 );
 const destination = join(
   tauriDir,
   "binaries",
-  `termigo-cli-${target}${extension}`,
+  `zedcode-cli-${target}${extension}`,
 );
 requireArtifact(source, "Built CLI artifact");
 mkdirSync(dirname(destination), { recursive: true });

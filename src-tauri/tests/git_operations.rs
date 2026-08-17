@@ -2,11 +2,11 @@ mod common;
 
 use common::{git_available, GitRepoFixture};
 use tempfile::TempDir;
-use termigo_lib::modules::fs::to_canon;
-use termigo_lib::modules::git::errors::GitError;
-use termigo_lib::modules::git::operations;
-use termigo_lib::modules::git::types::DiscardEntry;
-use termigo_lib::modules::workspace::{WorkspaceEnv, WorkspaceRegistry};
+use zedcode_lib::modules::fs::to_canon;
+use zedcode_lib::modules::git::errors::GitError;
+use zedcode_lib::modules::git::operations;
+use zedcode_lib::modules::git::types::DiscardEntry;
+use zedcode_lib::modules::workspace::{WorkspaceEnv, WorkspaceRegistry};
 
 fn skip_if_no_git() -> bool {
     if !git_available() {

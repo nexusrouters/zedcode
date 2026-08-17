@@ -7,8 +7,8 @@ import (
 )
 
 func TestSaveAndLoadRoundTrip(t *testing.T) {
-	home := filepath.Join(t.TempDir(), "termigo-home")
-	t.Setenv("TERMIGO_HOME", home)
+	home := filepath.Join(t.TempDir(), "zedcode-home")
+	t.Setenv("ZEDCODE_HOME", home)
 
 	config := Config{
 		DefaultAgent: "claude",
@@ -39,7 +39,7 @@ func TestSaveAndLoadRoundTrip(t *testing.T) {
 }
 
 func TestLoadMissingFileReturnsEmpty(t *testing.T) {
-	t.Setenv("TERMIGO_HOME", filepath.Join(t.TempDir(), "nowhere"))
+	t.Setenv("ZEDCODE_HOME", filepath.Join(t.TempDir(), "nowhere"))
 	config, err := Load()
 	if err != nil {
 		t.Fatalf("Load failed: %v", err)
@@ -50,19 +50,19 @@ func TestLoadMissingFileReturnsEmpty(t *testing.T) {
 }
 
 func TestHomeHonoursOverride(t *testing.T) {
-	t.Setenv("TERMIGO_HOME", "C:/custom/termigo")
+	t.Setenv("ZEDCODE_HOME", "C:/custom/zedcode")
 	home, err := Home()
 	if err != nil {
 		t.Fatalf("Home failed: %v", err)
 	}
-	if home != "C:/custom/termigo" {
+	if home != "C:/custom/zedcode" {
 		t.Fatalf("home = %q", home)
 	}
 }
 
 func TestLoadMalformedJSON(t *testing.T) {
-	home := filepath.Join(t.TempDir(), "termigo-home")
-	t.Setenv("TERMIGO_HOME", home)
+	home := filepath.Join(t.TempDir(), "zedcode-home")
+	t.Setenv("ZEDCODE_HOME", home)
 	if err := os.MkdirAll(home, 0o755); err != nil {
 		t.Fatal(err)
 	}

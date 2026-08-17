@@ -2,7 +2,7 @@
 //
 // The Rust side and the typed bridge for MCP already existed, but nothing
 // imported the bridge: the commands were registered, servers could be
-// configured in `.termigo/mcp.json`, and the agent still received not a single
+// configured in `.zedcode/mcp.json`, and the agent still received not a single
 // MCP tool. This is the missing connection.
 //
 // Discovery is async (each server is a child process that has to start and

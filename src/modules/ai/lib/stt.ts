@@ -23,7 +23,7 @@ function multipartBody(
   file: { field: string; filename: string; type: string; bytes: Uint8Array },
   fields: Record<string, string>,
 ): { body: Blob; contentType: string } {
-  const boundary = `----termigo${crypto.randomUUID().replace(/-/g, "")}`;
+  const boundary = `----zedcode${crypto.randomUUID().replace(/-/g, "")}`;
   const encoder = new TextEncoder();
   const parts: Uint8Array[] = [];
 

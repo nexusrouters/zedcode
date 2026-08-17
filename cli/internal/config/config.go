@@ -1,5 +1,5 @@
-// Package config manages the user-level Termigo configuration stored under
-// the Termigo home directory (defaults to ~/.termigo).
+// Package config manages the user-level ZedCode configuration stored under
+// the ZedCode home directory (defaults to ~/.zedcode).
 //
 // Configuration is deliberately small and local: providers, MCP servers and
 // preferences. It never stores API keys; provider keys live in the operating
@@ -15,10 +15,10 @@ import (
 	"runtime"
 )
 
-// FileName is the user configuration file name inside the Termigo home.
+// FileName is the user configuration file name inside the ZedCode home.
 const FileName = "config.json"
 
-// Config is the user-level Termigo configuration.
+// Config is the user-level ZedCode configuration.
 type Config struct {
 	// Providers lists configured agent providers. Keys are provider ids
 	// (codex, claude, gemini, ollama, ...) and values are options.
@@ -49,16 +49,16 @@ type MCPServer struct {
 	Env     map[string]string `json:"env,omitempty"`
 }
 
-// Home returns the Termigo home directory, honouring TERMIGO_HOME.
+// Home returns the ZedCode home directory, honouring ZEDCODE_HOME.
 func Home() (string, error) {
-	if override := os.Getenv("TERMIGO_HOME"); override != "" {
+	if override := os.Getenv("ZEDCODE_HOME"); override != "" {
 		return override, nil
 	}
 	base, err := os.UserHomeDir()
 	if err != nil {
 		return "", fmt.Errorf("resolve home directory: %w", err)
 	}
-	return filepath.Join(base, ".termigo"), nil
+	return filepath.Join(base, ".zedcode"), nil
 }
 
 // Path returns the user config file path.

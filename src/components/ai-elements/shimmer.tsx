@@ -43,7 +43,7 @@ const ShimmerComponent = ({
         // leans past it - the "d" of "Reasoned" came out with its tail cut
         // off. A sliver of trailing padding gives the overhang somewhere to
         // land. Inline-end rather than right so it still works in RTL.
-        "termigo-shimmer relative inline-block bg-clip-text pe-[0.12em] text-transparent",
+        "zedcode-shimmer relative inline-block bg-clip-text pe-[0.12em] text-transparent",
         className
       ),
       style: {

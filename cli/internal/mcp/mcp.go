@@ -1,4 +1,4 @@
-// Package mcp manages Model Context Protocol (MCP) servers for Termigo.
+// Package mcp manages Model Context Protocol (MCP) servers for ZedCode.
 //
 // Servers are configured with the standard MCP shape and launched as local
 // child processes speaking JSON-RPC 2.0 over stdio:
@@ -13,8 +13,8 @@
 //	  }
 //	}
 //
-// The registry is read from <workspace>/.termigo/mcp.json and merged with the
-// user-level registry in the Termigo home directory.
+// The registry is read from <workspace>/.zedcode/mcp.json and merged with the
+// user-level registry in the ZedCode home directory.
 package mcp
 
 import (
@@ -26,11 +26,11 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/99apps-id/termigo/cli/internal/config"
+	"github.com/nexusrouters/zedcode/cli/internal/config"
 )
 
 // WorkspaceFileName is the project-scoped MCP registry file.
-const WorkspaceFileName = ".termigo/mcp.json"
+const WorkspaceFileName = ".zedcode/mcp.json"
 
 // Server is one configured MCP server.
 type Server struct {
@@ -145,7 +145,7 @@ func Add(workspace, name string, server config.MCPServer) (Server, error) {
 		return Server{}, err
 	}
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		return Server{}, fmt.Errorf("create .termigo folder: %w", err)
+		return Server{}, fmt.Errorf("create .zedcode folder: %w", err)
 	}
 	if err := os.WriteFile(path, append(data, '\n'), 0o644); err != nil {
 		return Server{}, fmt.Errorf("write %s: %w", path, err)

@@ -21,7 +21,7 @@ const defaultTimeout = 60 * time.Second
 
 // Client is a minimal MCP client that talks JSON-RPC 2.0 to a local server
 // over stdio. It supports initialization, tool discovery and tool calls,
-// which is enough to inspect and exercise the servers Termigo manages.
+// which is enough to inspect and exercise the servers ZedCode manages.
 type Client struct {
 	cmd       *exec.Cmd
 	stdin     io.WriteCloser
@@ -108,7 +108,7 @@ func Connect(ctx context.Context, server Server) (*Client, error) {
 	if _, err := client.call(initializeCtx, "initialize", map[string]any{
 		"protocolVersion": ProtocolVersion,
 		"capabilities":    map[string]any{},
-		"clientInfo":      map[string]string{"name": "termigo", "version": "0.1.0"},
+		"clientInfo":      map[string]string{"name": "zedcode", "version": "0.1.0"},
 	}); err != nil {
 		_ = client.Close()
 		return nil, fmt.Errorf("initialize MCP server %q: %w", server.Name, err)

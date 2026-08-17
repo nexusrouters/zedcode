@@ -62,7 +62,7 @@ pub struct Manifest {
 pub struct Engines {
     /// Semver requirement, e.g. `">=0.2.6"`. Missing means "any".
     #[serde(default)]
-    pub termigo: Option<String>,
+    pub zedcode: Option<String>,
 }
 
 impl Manifest {

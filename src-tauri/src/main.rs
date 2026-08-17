@@ -14,5 +14,5 @@ fn main() {
         }
     }
 
-    termigo_lib::run()
+    zedcode_lib::run()
 }

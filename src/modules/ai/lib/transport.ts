@@ -17,7 +17,7 @@ import { native } from "./native";
 import type { ToolContext } from "../tools/tools";
 
 /**
- * How much of `TERMIGO.md` reaches the model.
+ * How much of `ZEDCODE.md` reaches the model.
  *
  * Project memory is part of the system prompt, so it is paid on every request
  * and in full on the first one, where nothing is cached yet. This repo's own
@@ -33,7 +33,7 @@ import type { ToolContext } from "../tools/tools";
  * two only diverge on non-ASCII text, and this is prose about code, but the
  * old name said bytes and the check said characters.
  */
-export const TERMIGO_MD_MAX_CHARS = 10 * 1024;
+export const ZEDCODE_MD_MAX_CHARS = 10 * 1024;
 
 type MemoryCacheEntry = { content: string | null; mtime: number };
 const projectMemoryCache = new Map<string, MemoryCacheEntry>();
@@ -64,17 +64,17 @@ function logAndFormatAiError(error: unknown): string {
  * also tells the agent the rest exists and can be read.
  */
 export function truncateProjectMemory(content: string): string {
-  if (content.length <= TERMIGO_MD_MAX_CHARS) return content;
-  const cut = content.slice(0, TERMIGO_MD_MAX_CHARS);
+  if (content.length <= ZEDCODE_MD_MAX_CHARS) return content;
+  const cut = content.slice(0, ZEDCODE_MD_MAX_CHARS);
   const lastBreak = cut.lastIndexOf("\n");
   // A file with no newline in the budget has nothing better to cut on.
   const body = lastBreak > 0 ? cut.slice(0, lastBreak) : cut;
-  return `${body}\n\n[TERMIGO.md truncated here; read the file for the rest]`;
+  return `${body}\n\n[ZEDCODE.md truncated here; read the file for the rest]`;
 }
 
-async function readTermigoMd(workspaceRoot: string | null): Promise<string | null> {
+async function readZedCodeMd(workspaceRoot: string | null): Promise<string | null> {
   if (!workspaceRoot) return null;
-  const path = `${workspaceRoot.replace(/\/$/, "")}/TERMIGO.md`;
+  const path = `${workspaceRoot.replace(/\/$/, "")}/ZEDCODE.md`;
   const cached = projectMemoryCache.get(workspaceRoot);
   if (cached && Date.now() - cached.mtime < 30_000) return cached.content;
   try {
@@ -147,7 +147,7 @@ export function createContextAwareTransport(deps: Deps) {
     // can turn a file read into twenty seconds.
     const contextStart = performance.now();
     const [projectMemory, learnedMemory, mcpTools, skills, customDefs] = await Promise.all([
-      readTermigoMd(live.workspaceRoot),
+      readZedCodeMd(live.workspaceRoot),
       readMemory(live.workspaceRoot),
       getMcpTools(live.workspaceRoot),
       listSkills(live.workspaceRoot),

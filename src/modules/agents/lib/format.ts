@@ -5,7 +5,7 @@ const LABELS: Record<string, string> = {
   pi: "Pi",
   opencode: "OpenCode",
   grok: "Grok",
-  termigo: "ZedCode",
+  zedcode: "ZedCode",
 };
 
 export function displayAgent(agent: string): string {

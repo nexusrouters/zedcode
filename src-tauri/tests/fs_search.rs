@@ -1,9 +1,9 @@
 mod common;
 
 use common::{git_available, FsFixture, GitRepoFixture};
-use termigo_lib::modules::fs::grep::{fs_glob, fs_grep};
-use termigo_lib::modules::fs::search::{fs_list_files, fs_search};
-use termigo_lib::modules::fs::tree::{fs_read_dir, list_subdirs, EntryKind};
+use zedcode_lib::modules::fs::grep::{fs_glob, fs_grep};
+use zedcode_lib::modules::fs::search::{fs_list_files, fs_search};
+use zedcode_lib::modules::fs::tree::{fs_read_dir, list_subdirs, EntryKind};
 
 #[test]
 fn grep_finds_matches_and_returns_relative_paths() {

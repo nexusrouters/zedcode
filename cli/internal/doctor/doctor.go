@@ -1,4 +1,4 @@
-// Package doctor reports the local tools that Termigo can integrate with.
+// Package doctor reports the local tools that ZedCode can integrate with.
 package doctor
 
 import (
@@ -15,7 +15,7 @@ type Report struct {
 	Tools []Tool `json:"tools"`
 }
 
-// Tool describes one executable that can be used by Termigo.
+// Tool describes one executable that can be used by ZedCode.
 type Tool struct {
 	Name      string `json:"name"`
 	Command   string `json:"command"`

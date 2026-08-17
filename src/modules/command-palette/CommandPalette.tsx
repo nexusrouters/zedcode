@@ -118,7 +118,7 @@ export function CommandPalette({
     setQuery(initialMode === "content" ? "#" : "");
     setPage("root");
     const handle = window.setTimeout(() => {
-      document.getElementById("termigo-command-palette-input")?.focus();
+      document.getElementById("zedcode-command-palette-input")?.focus();
     }, 0);
     return () => window.clearTimeout(handle);
   }, [open, initialMode]);
@@ -226,7 +226,7 @@ export function CommandPalette({
         onKeyDown={onKeyDown}
       >
         <CommandInput
-          id="termigo-command-palette-input"
+          id="zedcode-command-palette-input"
           value={query}
           onValueChange={setQuery}
           placeholder={placeholder}

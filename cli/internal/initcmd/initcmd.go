@@ -1,10 +1,10 @@
-// Package initcmd scaffolds the Termigo workspace layout:
+// Package initcmd scaffolds the ZedCode workspace layout:
 //
 //	<workspace>/
-//	├── .termigo/
+//	├── .zedcode/
 //	│   ├── mcp.json          MCP server registry (optional)
 //	│   └── skills/           project-scoped skills (optional)
-//	└── TERMIGO.md            project memory for agents (optional)
+//	└── ZEDCODE.md            project memory for agents (optional)
 package initcmd
 
 import (
@@ -42,12 +42,12 @@ func Run(workspace string) (Result, error) {
 		return path, nil
 	}
 
-	skillsDir := filepath.Join(workspace, ".termigo", "skills")
+	skillsDir := filepath.Join(workspace, ".zedcode", "skills")
 	if err := os.MkdirAll(skillsDir, 0o755); err != nil {
-		return Result{}, fmt.Errorf("create .termigo/skills: %w", err)
+		return Result{}, fmt.Errorf("create .zedcode/skills: %w", err)
 	}
 
-	mcpPath := filepath.Join(workspace, ".termigo", "mcp.json")
+	mcpPath := filepath.Join(workspace, ".zedcode", "mcp.json")
 	if _, err := os.Stat(mcpPath); os.IsNotExist(err) {
 		if created, err := create(mcpPath, mcpTemplate); err != nil {
 			return Result{}, err
@@ -65,7 +65,7 @@ func Run(workspace string) (Result, error) {
 		}
 	}
 
-	memoryPath := filepath.Join(workspace, "TERMIGO.md")
+	memoryPath := filepath.Join(workspace, "ZEDCODE.md")
 	if _, err := os.Stat(memoryPath); os.IsNotExist(err) {
 		projectName := filepath.Base(workspace)
 		if created, err := create(memoryPath, memoryTemplate(projectName)); err != nil {
@@ -101,7 +101,7 @@ Add one folder per skill, each with a SKILL.md file:
 
 SKILL.md starts with YAML frontmatter (name, description) followed by
 Markdown instructions for the agent. Optional helper scripts live next to
-SKILL.md. See docs/SKILLS.md in the Termigo repository.
+SKILL.md. See docs/SKILLS.md in the ZedCode repository.
 `
 
 func memoryTemplate(projectName string) string {

@@ -161,8 +161,8 @@ describe("local vs remote cwd", () => {
   };
 
   it("records a local shell's cwd as the local cwd", () => {
-    const next = setLeafCwd(localLeaf, 1, "C:/project/termigo");
-    expect(findLeafCwd(next, 1)).toBe("C:/project/termigo");
+    const next = setLeafCwd(localLeaf, 1, "C:/project/zedcode");
+    expect(findLeafCwd(next, 1)).toBe("C:/project/zedcode");
     expect(findLeafRemoteCwd(next, 1)).toBeUndefined();
   });
 

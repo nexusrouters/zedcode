@@ -1,6 +1,6 @@
 // Typed wrappers over the Rust `mcp` commands.
 //
-// The registry is the same `.termigo/mcp.json` the Go companion CLI reads, so a
+// The registry is the same `.zedcode/mcp.json` the Go companion CLI reads, so a
 // server configured for one is available to the other. Project entries override
 // user entries of the same name.
 
@@ -72,7 +72,7 @@ export async function mcpPing(
   return invoke<boolean>("mcp_ping", { server, workspace: workspace ?? null });
 }
 
-/** Add or replace a user-level server in `~/.termigo/mcp.json`. */
+/** Add or replace a user-level server in `~/.zedcode/mcp.json`. */
 export async function mcpAddServer(input: {
   name: string;
   command: string;

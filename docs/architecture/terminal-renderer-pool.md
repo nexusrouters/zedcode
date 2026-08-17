@@ -1,10 +1,10 @@
 # Terminal renderer pool
 
-This guide elaborates on `TERMIGO.md`. If anything here conflicts with `TERMIGO.md`, `TERMIGO.md` wins.
+This guide elaborates on `ZEDCODE.md`. If anything here conflicts with `ZEDCODE.md`, `ZEDCODE.md` wins.
 
 ## Why a pool exists
 
-Terminal tabs are kept mounted and hidden on switch so PTYs and dev servers keep streaming in the background. Creating an unbounded number of live xterm + WebGL renderer instances would blow the memory budget, so Termigo pools renderer slots.
+Terminal tabs are kept mounted and hidden on switch so PTYs and dev servers keep streaming in the background. Creating an unbounded number of live xterm + WebGL renderer instances would blow the memory budget, so ZedCode pools renderer slots.
 
 The pool lives in `src/modules/terminal/lib/rendererPool.ts`.
 
@@ -60,6 +60,6 @@ WebGL addons are created when a slot becomes visible and reaped after a grace pe
 
 ## See also
 
-- [`TERMIGO.md`](../../TERMIGO.md) - the architecture source of truth
+- [`ZEDCODE.md`](../../ZEDCODE.md) - the architecture source of truth
 - [`docs/README.md`](../README.md) - index of contributor guides
 - [PTY shell integration](pty-shell-integration.md) - sessions, OSC sequences, and ConPTY

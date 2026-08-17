@@ -123,7 +123,7 @@ fn ensure_started(state: &FsWatchState, app: &AppHandle) -> Result<(), String> {
 
     let app = app.clone();
     std::thread::Builder::new()
-        .name("termigo-fs-watch".into())
+        .name("zedcode-fs-watch".into())
         .spawn(move || drain_loop(rx, app))
         .map_err(|e| e.to_string())?;
 

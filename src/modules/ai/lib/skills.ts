@@ -9,7 +9,7 @@
 // Layout follows the convention other agent tools have settled on, one
 // directory per skill holding a SKILL.md with frontmatter:
 //
-//   .termigo/skills/deploy-to-vps/SKILL.md
+//   .zedcode/skills/deploy-to-vps/SKILL.md
 //
 // Only the name and description are put in the system prompt. Bodies are
 // loaded on demand, because a handful of skills at a few kilobytes each would
@@ -18,7 +18,7 @@
 
 import { native } from "./native";
 
-export const SKILLS_REL_DIR = ".termigo/skills";
+export const SKILLS_REL_DIR = ".zedcode/skills";
 
 /** A description longer than this is a body in disguise. */
 export const MAX_DESCRIPTION_CHARS = 300;
@@ -192,7 +192,7 @@ export async function saveSkill(
 
   const replaced = (await readSkill(workspaceRoot, skill.name)) !== null;
   try {
-    // write_atomic does not create parents, and .termigo/skills will not exist
+    // write_atomic does not create parents, and .zedcode/skills will not exist
     // in a workspace that has never saved one.
     await native.createDir(skillDir(workspaceRoot, skill.name));
   } catch {
@@ -213,7 +213,7 @@ export function skillsBlock(skills: readonly Skill[]): string {
   if (skills.length === 0) return "";
   const lines = skills.map((s) => `- ${s.name}: ${s.description}`);
   return (
-    `\n\n## SKILLS - .termigo/skills/\n` +
+    `\n\n## SKILLS - .zedcode/skills/\n` +
     `Procedures you wrote in earlier sessions. When one matches the task, call\n` +
     `\`use_skill\` with its name to read it BEFORE working out your own approach.\n` +
     `${lines.join("\n")}`

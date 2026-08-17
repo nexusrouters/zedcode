@@ -541,7 +541,7 @@ export default function App() {
       // Dispatch a window event the composer listens for. Same pattern as
       // selections — keeps file-explorer decoupled from the AI module.
       window.dispatchEvent(
-        new CustomEvent<string>("termigo:ai-attach-file", { detail: path }),
+        new CustomEvent<string>("zedcode:ai-attach-file", { detail: path }),
       );
       openPanel();
       focusInput(null);
@@ -633,7 +633,7 @@ ${found.foundAt}`
             agent: request.agent,
           }).catch((error) => {
             console.warn(
-              `[termigo] could not enable ${request.agent} notifications:`,
+              `[zedcode] could not enable ${request.agent} notifications:`,
               error,
             );
           })
@@ -644,7 +644,7 @@ ${found.foundAt}`
           await Promise.all([whenSessionReady(leafId), hooksReady]);
           if (!writeToSession(leafId, `${command.command}\r`)) {
             console.error(
-              `[termigo] agent terminal ${leafId} closed before launch`,
+              `[zedcode] agent terminal ${leafId} closed before launch`,
             );
           }
         })();
@@ -704,7 +704,7 @@ ${found.foundAt}`
     let unlisten: (() => void) | undefined;
     let disposed = false;
     (async () => {
-      const off = await listen<string[]>("termigo:open-file", (e) => {
+      const off = await listen<string[]>("zedcode:open-file", (e) => {
         openLaunchFiles(e.payload);
       });
       if (disposed) off();
@@ -1483,7 +1483,7 @@ ${found.foundAt}`
                 <div className="flex h-full min-h-0 flex-col border-r border-border/60 bg-card">
                   <div
                     key={sidebarView}
-                    className="min-h-0 flex-1 termigo-panel-in"
+                    className="min-h-0 flex-1 zedcode-panel-in"
                   >
                     {sidebarView === "explorer" ? (
                       <FileExplorer

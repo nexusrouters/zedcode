@@ -13,7 +13,7 @@ export function buildMemoryTools(ctx: ToolContext) {
         "Do NOT use it for the current task, transient state, file contents you can re-read, " +
         "or anything the user has not confirmed. One fact per call, written as a short " +
         "standalone sentence that will still make sense with no conversation around it. " +
-        "Stored in .termigo/memory.md, which the user can edit or delete. Asks for approval.",
+        "Stored in .zedcode/memory.md, which the user can edit or delete. Asks for approval.",
       inputSchema: z.object({
         fact: z
           .string()

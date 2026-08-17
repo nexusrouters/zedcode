@@ -1,9 +1,9 @@
-# termigo-shell-integration (zprofile)
+# zedcode-shell-integration (zprofile)
 #
 # See zshenv.zsh for the rationale on the trailing `:`.
 {
-  _termigo_user_zdotdir="${TERMIGO_USER_ZDOTDIR:-$HOME}"
-  [ -f "$_termigo_user_zdotdir/.zprofile" ] && source "$_termigo_user_zdotdir/.zprofile"
-  unset _termigo_user_zdotdir
+  _zedcode_user_zdotdir="${ZEDCODE_USER_ZDOTDIR:-$HOME}"
+  [ -f "$_zedcode_user_zdotdir/.zprofile" ] && source "$_zedcode_user_zdotdir/.zprofile"
+  unset _zedcode_user_zdotdir
 }
 :

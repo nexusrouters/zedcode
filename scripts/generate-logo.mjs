@@ -1,7 +1,7 @@
-// Derive every Termigo brand asset (PNG/ICO/ICNS) from the master artwork,
+// Derive every ZedCode brand asset (PNG/ICO/ICNS) from the master artwork,
 // with zero dependencies.
 //
-// `termigo.png` at the repository root is the master, and this script never
+// `zedcode.png` at the repository root is the master, and this script never
 // writes it: it is the input. Everything else (public/logo.png and the whole
 // src-tauri/icons set) is generated from it, so the app, the installer and the
 // README cannot drift apart.
@@ -69,7 +69,7 @@ function encodePng(width, height, rgba) {
 // Decoding is limited to what the master actually is - 8-bit RGBA, no
 // interlacing - and fails loudly on anything else instead of guessing.
 
-const MASTER = "termigo.png";
+const MASTER = "zedcode.png";
 
 function decodePng(buf) {
   if (buf.readUInt32BE(0) !== 0x89504e47) throw new Error(`${MASTER}: not a PNG`);
@@ -375,7 +375,7 @@ const iconsDir = "src-tauri/icons";
 mkdirSync(iconsDir, { recursive: true });
 
 // In-app logo (AI mini window, terminal block watermark, agent icon).
-// NOTE: `termigo.png` is the master input and is deliberately not written here.
+// NOTE: `zedcode.png` is the master input and is deliberately not written here.
 writeFileSync("public/logo.png", encodePng(256, 256, render(256)));
 
 // Tauri icons.
@@ -403,7 +403,7 @@ for (const [name, size] of storeSizes) {
   writeFileSync(`${iconsDir}/${name}`, encodePng(size, size, render(size)));
 }
 
-console.log(`Generated Termigo brand assets from ${MASTER}:`);
+console.log(`Generated ZedCode brand assets from ${MASTER}:`);
 for (const f of [
   "public/logo.png",
   `${iconsDir}/32x32.png`,

@@ -465,7 +465,7 @@ export const LANGUAGES: LanguageDefinition[] = [
   },
   {
     name: "ZedCode Theme",
-    extensions: ["termigo-theme"],
+    extensions: ["zedcode-theme"],
     loader: async () => {
       const [{ json }, { colorSwatches }] = await Promise.all([
         import("@codemirror/lang-json"),

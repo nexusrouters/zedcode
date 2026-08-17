@@ -4,7 +4,7 @@
 
   <p><strong>Terminal-first, AI-native development workspace.</strong></p>
   <p>
-    <a href="https://github.com/99apps-id/termigo">Repository</a>
+    <a href="https://github.com/nexusrouters/zedcode">Repository</a>
     ·
     <a href="#features">Features</a>
     ·
@@ -17,7 +17,7 @@
 
   <p>
     <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey" alt="platform" />
-    <img src="https://img.shields.io/github/license/99apps-id/termigo?color=blue" alt="license" />
+    <img src="https://img.shields.io/github/license/nexusrouters/zedcode?color=blue" alt="license" />
     <img src="https://img.shields.io/badge/runtime-no%20Electron-brightgreen" alt="no Electron" />
     <img src="https://img.shields.io/badge/telemetry-none-blue" alt="no telemetry" />
   </p>
@@ -25,7 +25,7 @@
 
 ---
 
-**Termigo** is a lightweight open-source, terminal-first AI-native development
+**ZedCode** is a lightweight open-source, terminal-first AI-native development
 environment (ADE) built on **Tauri 2 + Rust** with a **React 19** frontend. A
 native PTY backend, an agentic AI side-panel that runs against your own keys or
 fully local models, a code editor, file explorer, source control with a git
@@ -34,7 +34,7 @@ Your API keys stay in the OS keychain or with the provider's own CLI.
 
 This project is a **fork of [Terax](https://github.com/crynta/terax-ai)**
 (by Crynta, Apache-2.0), extended with a **Go command-line companion**
-(`termi-go`) for automation: agent runs, MCP, skills, and project scaffolding.
+(`zedcode`) for automation: agent runs, MCP, skills, and project scaffolding.
 
 ## Features
 
@@ -65,7 +65,7 @@ This project is a **fork of [Terax](https://github.com/crynta/terax-ai)**
   OpenAI-compatible endpoint
 - **Local / offline:** LM Studio, MLX, Ollama
 - **Skills.** The agent writes reusable procedures for itself in
-  `.termigo/skills/<name>/SKILL.md` — a deploy sequence, a debugging route that
+  `.zedcode/skills/<name>/SKILL.md` — a deploy sequence, a debugging route that
   worked, a release checklist — and reads them back in later sessions. This is
   what makes it better over time rather than merely better informed: memory
   stops a session starting from zero, a skill means a procedure worked out once
@@ -77,13 +77,13 @@ This project is a **fork of [Terax](https://github.com/crynta/terax-ai)**
   on the machine on demand — your own, and those installed by other agent tools
   — so a large collection stays reachable without any of it sitting in the
   prompt. Skills written for another agent still parse, and `use_skill` says so
-  when one calls tools Termigo does not have.
+  when one calls tools ZedCode does not have.
 - **Self-maintaining memory.** The agent records durable project facts in
-  `.termigo/memory.md` and reads them back in every later session, so build
+  `.zedcode/memory.md` and reads them back in every later session, so build
   commands, conventions and decisions do not have to be re-explained. Facts are
   captured two ways: a `remember` tool the model calls deliberately (visible in
   the transcript, approval-gated like any workspace write), and a summary sweep
-  when a session is left behind. Your hand-written `TERMIGO.md` is never
+  when a session is left behind. Your hand-written `ZEDCODE.md` is never
   rewritten, so you can always tell what you wrote from what the agent
   inferred, and deleting a line makes it forget. The file is bounded in entry
   length, entry count and total size, because everything in it costs context on
@@ -145,12 +145,12 @@ This project is a **fork of [Terax](https://github.com/crynta/terax-ai)**
   written to disk, capped at 30, and hold no API keys: the snapshot is taken
   before the provider SDK attaches credentials.
 - **The agent can define its own tools.** A command worth repeating is saved as
-  a named tool with `{{placeholders}}` in `.termigo/tools.json` and called by
+  a named tool with `{{placeholders}}` in `.zedcode/tools.json` and called by
   name afterwards. It is a command template, not code — running one goes
   through the same shell safety check, approval tier and remote routing as
   `bash_run`, so a custom tool can do nothing the agent could not already do.
   Arguments are shell-quoted with no raw mode.
-- Agentic workflow: plans, sub-agents, project memory via `TERMIGO.md`,
+- Agentic workflow: plans, sub-agents, project memory via `ZEDCODE.md`,
   read, write, edit, multi-edit, grep, glob, move, copy, delete,
   cross-file literal replace, HTTP fetch, bash with approval gating,
   background processes, and SSH port forwarding so a service on a remote host
@@ -197,7 +197,7 @@ This project is a **fork of [Terax](https://github.com/crynta/terax-ai)**
 - **Tools the agent defines for itself.** After running something worth
   repeating, the agent can save it as a named tool with `create_tool`, and call
   it by name from then on. A tool is a shell command template with
-  `{{placeholders}}`, stored in `.termigo/tools.json` — not code. Running one
+  `{{placeholders}}`, stored in `.zedcode/tools.json` — not code. Running one
   goes through the same path `bash_run` takes, so the shell safety check, the
   approval tiers and the remote/local routing all apply unchanged: a custom
   tool can do nothing the agent could not already do. Every argument is
@@ -211,7 +211,7 @@ This project is a **fork of [Terax](https://github.com/crynta/terax-ai)**
 - **MCP servers.** Tools from any configured Model Context Protocol server are
   offered to the agent alongside the built-in ones, named `mcp__<server>__<tool>`
   so their origin stays visible in the transcript. Configure them in
-  `.termigo/mcp.json` in the workspace, or `~/.termigo/mcp.json` for every
+  `.zedcode/mcp.json` in the workspace, or `~/.zedcode/mcp.json` for every
   project, using the standard `mcpServers` shape:
 
   ```json
@@ -302,22 +302,22 @@ cd src-tauri && cargo clippy --all-targets -- -D warnings && cargo test
 
 ## CLI
 
-Termigo ships **two** separate command-line programs. They do different jobs,
+ZedCode ships **two** separate command-line programs. They do different jobs,
 and only the first one is installed with the app.
 
 ### 1. Control CLI (Rust, bundled with the app)
 
-Installed alongside the desktop app as `termigo`. It talks to a **running**
-Termigo window over the local control socket:
+Installed alongside the desktop app as `zedcode`. It talks to a **running**
+ZedCode window over the local control socket:
 
 ```bash
-termigo README.md              # open a file in the running app
-termigo README.md --line 42    # open at a line
-termigo open README.md         # explicit form of the same thing
-termigo ping                   # is the app reachable?
-termigo capabilities           # what this build supports
-termigo identify               # which window/pane answered
-termigo help
+zedcode README.md              # open a file in the running app
+zedcode README.md --line 42    # open at a line
+zedcode open README.md         # explicit form of the same thing
+zedcode ping                   # is the app reachable?
+zedcode capabilities           # what this build supports
+zedcode identify               # which window/pane answered
+zedcode help
 ```
 
 It does **not** know `agent`, `mcp`, `skill`, `doctor` or `init`. Those belong
@@ -330,35 +330,35 @@ the desktop surfaces interactively and runs without the app open.
 
 ```bash
 cd cli
-go build -o termi-go ./cmd/termigo   # or: go run ./cmd/termigo <args>
+go build -o zedcode ./cmd/zedcode   # or: go run ./cmd/zedcode <args>
 ```
 
-Name the binary something other than `termigo` (for example `termi-go`), or
+Name the binary something other than `zedcode` (for example `zedcode`), or
 put it on `PATH` ahead of the control CLI. Two binaries with the same name is
-exactly what makes `termigo agent list` fail confusingly.
+exactly what makes `zedcode agent list` fail confusingly.
 
 ```bash
-./termi-go help
-./termi-go doctor --json                # inspect local tools
-./termi-go init <dir>                   # scaffold .termigo/ + TERMIGO.md
-./termi-go agent list                   # installed agent providers
-./termi-go agent run codex "explain this repo" --access read-only
-./termi-go skill create review "Review diffs before commit"
-./termi-go mcp list                     # configured MCP servers
-./termi-go mcp tools fs                 # list tools of an MCP server
-./termi-go config                       # show user configuration
+./zedcode help
+./zedcode doctor --json                # inspect local tools
+./zedcode init <dir>                   # scaffold .zedcode/ + ZEDCODE.md
+./zedcode agent list                   # installed agent providers
+./zedcode agent run codex "explain this repo" --access read-only
+./zedcode skill create review "Review diffs before commit"
+./zedcode mcp list                     # configured MCP servers
+./zedcode mcp tools fs                 # list tools of an MCP server
+./zedcode config                       # show user configuration
 ```
 
 - **Providers:** Codex, Claude Code, Gemini, Antigravity, Ollama (local).
   `agent run` drives Codex, Claude and Gemini in print mode and Ollama over its
   local HTTP API; a provider with no headless mode is reported rather than
   launched blind.
-- **Provider overrides:** `providers.<id>.command` in `~/.termigo/config.json`
+- **Provider overrides:** `providers.<id>.command` in `~/.zedcode/config.json`
   points at a CLI installed outside `PATH`; `model` and `endpoint` are honoured
   the same way.
 - **Skills:** project- and user-scoped `SKILL.md` folders under
-  `.termigo/skills/` and `~/.termigo/skills/`
-- **MCP:** standard `mcpServers` registry in `.termigo/mcp.json`, JSON-RPC 2.0
+  `.zedcode/skills/` and `~/.zedcode/skills/`
+- **MCP:** standard `mcpServers` registry in `.zedcode/mcp.json`, JSON-RPC 2.0
   over stdio (initialize, tools/list, tools/call, ping)
 - **Never stores API keys**: credentials stay with each provider's own CLI
 
@@ -367,7 +367,7 @@ See [`docs/`](docs/) for the MCP, skills, agents, and architecture guides.
 ## Screenshots
 
 <p align="center">
-  <img src="docs/termigo-windows.png" alt="Termigo on Windows" width="900" />
+  <img src="docs/zedcode-windows.png" alt="ZedCode on Windows" width="900" />
   <br/>
   <sub>
     The workspace: file tree, editor with the TypeScript LSP attached, the
@@ -377,7 +377,7 @@ See [`docs/`](docs/) for the MCP, skills, agents, and architecture guides.
 </p>
 
 <p align="center">
-  <img src="docs/termigo-remote-vps.png" alt="The agent inspecting a remote server over SSH" width="900" />
+  <img src="docs/zedcode-remote-vps.png" alt="The agent inspecting a remote server over SSH" width="900" />
   <br/>
   <sub>
     The agent working on a server: an SSH tab, the remote filesystem browsable
@@ -387,7 +387,7 @@ See [`docs/`](docs/) for the MCP, skills, agents, and architecture guides.
 </p>
 
 <p align="center">
-  <img src="docs/termigo-running-hermes-vps.png" alt="An SSH session in Termigo running a terminal agent on the remote host" width="900" />
+  <img src="docs/zedcode-running-hermes-vps.png" alt="An SSH session in ZedCode running a terminal agent on the remote host" width="900" />
   <br/>
   <sub>
     An SSH tab is an ordinary terminal: a TUI agent running on the remote host,
@@ -396,7 +396,7 @@ See [`docs/`](docs/) for the MCP, skills, agents, and architecture guides.
 </p>
 
 <p align="center">
-  <img src="docs/termigo-add-new-ssh-connection.png" alt="The New SSH connection dialog" width="760" />
+  <img src="docs/zedcode-add-new-ssh-connection.png" alt="The New SSH connection dialog" width="760" />
   <br/>
   <sub>
     Adding a host: password, private key or ssh-agent, an optional ProxyJump
@@ -408,11 +408,11 @@ See [`docs/`](docs/) for the MCP, skills, agents, and architecture guides.
 ## Architecture
 
 ```text
-Termigo
+ZedCode
 |-- Desktop application        Rust + Tauri 2 + React 19 + TypeScript
 |   |-- src-tauri/             PTY, shell, git, agents, workspace, control
 |   `-- src/                   React UI (terminal, editor, AI, git, explorer)
-`-- termigo CLI                Go
+`-- zedcode CLI                Go
     `-- cli/                   agent, mcp, skill, config, doctor, init
 ```
 
@@ -432,10 +432,10 @@ headlessly lives in `cli/internal/` first.
 
 ## Credits
 
-Termigo is a **fork of [Terax](https://github.com/crynta/terax-ai)** by
+ZedCode is a **fork of [Terax](https://github.com/crynta/terax-ai)** by
 [Crynta](https://github.com/crynta) (Apache-2.0). The Tauri/Rust backend, the
 xterm.js terminal, the CodeMirror editor, and the AI agent pipeline are the
-work of Crynta and the Terax contributors. If Termigo is useful, please star
+work of Crynta and the Terax contributors. If ZedCode is useful, please star
 upstream [Terax](https://github.com/crynta/terax-ai).
 
 The design also draws inspiration from

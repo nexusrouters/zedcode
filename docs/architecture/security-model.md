@@ -1,8 +1,8 @@
 # Security model
 
-This guide elaborates on `TERMIGO.md`. If anything here conflicts with `TERMIGO.md`, `TERMIGO.md` wins.
+This guide elaborates on `ZEDCODE.md`. If anything here conflicts with `ZEDCODE.md`, `ZEDCODE.md` wins.
 
-Termigo runs shells, reads and writes files, and sends data to AI providers. The security model is defense-in-depth: no single guard is enough, so every boundary validates input before acting on it.
+ZedCode runs shells, reads and writes files, and sends data to AI providers. The security model is defense-in-depth: no single guard is enough, so every boundary validates input before acting on it.
 
 ## Boundaries
 
@@ -120,7 +120,7 @@ rules:
 3. Block cloud metadata endpoints (`169.254.169.254`, `metadata.google.internal`, AWS IPv6 metadata, etc.).
 4. Pin reqwest to the resolved IPs so a second DNS lookup cannot return a different address (DNS rebinding).
 
-Local LLM endpoints are explicitly allowed because the user opted in by pointing Termigo at them, but they are still classified and logged.
+Local LLM endpoints are explicitly allowed because the user opted in by pointing ZedCode at them, but they are still classified and logged.
 
 ## Secret storage
 
@@ -130,7 +130,7 @@ API keys are stored via `secrets_*` commands (`src-tauri/src/modules/secrets.rs`
 - Windows: Credential Manager via `keyring`
 - Linux: a JSON file in the app's local data dir with mode `0600` (atomic write to `.tmp` then rename)
 
-Service constant: `termigo-ai`. Keys never touch disk outside the keychain/Linux secrets file, never go in `localStorage`, and never appear in logs.
+Service constant: `zedcode-ai`. Keys never touch disk outside the keychain/Linux secrets file, never go in `localStorage`, and never appear in logs.
 
 ## OSC trust gating
 
@@ -140,7 +140,7 @@ The terminal parses OSC sequences from the PTY byte stream:
 - **OSC 133 A/B/C/D** marks prompt/command boundaries.
 - **OSC 777** is used by the agent detector to signal coding-agent state transitions.
 
-The agent detector (`src-tauri/src/modules/pty/agent_detect.rs`) is armed by `OSC 133;C;<cmd>` or by a self-armed marker and emits `termigo:agent-signal` events. It is driven **only by OSC sequences**, never by raw output, so a repainting TUI never flaps.
+The agent detector (`src-tauri/src/modules/pty/agent_detect.rs`) is armed by `OSC 133;C;<cmd>` or by a self-armed marker and emits `zedcode:agent-signal` events. It is driven **only by OSC sequences**, never by raw output, so a repainting TUI never flaps.
 
 ## Invariants
 
@@ -152,7 +152,7 @@ The agent detector (`src-tauri/src/modules/pty/agent_detect.rs`) is armed by `OS
 
 ## See also
 
-- [`TERMIGO.md`](../../TERMIGO.md) - the architecture source of truth
+- [`ZEDCODE.md`](../../ZEDCODE.md) - the architecture source of truth
 - [`docs/README.md`](../README.md) - index of contributor guides
 - [Two-process model](two-process-model.md) - IPC boundary and command catalog
 - [AI subsystem](ai-subsystem.md) - tools, approval flow, and provider handling

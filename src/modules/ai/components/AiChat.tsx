@@ -36,7 +36,7 @@ import {
   HashtagIcon,
   TerminalIcon,
 } from "@hugeicons/core-free-icons";
-import { SLASH_COMMANDS, TERMIGO_CMD_RE } from "../lib/slashCommands";
+import { SLASH_COMMANDS, ZEDCODE_CMD_RE } from "../lib/slashCommands";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatStore } from "../store/chatStore";
 import { resumeRun } from "../store/chatRuntime";
@@ -307,7 +307,7 @@ export function AiChatView({
  * sessions months from now, and in the permissive approval modes it is written
  * without a click. Four wrong ones once rode in that way and steered every
  * reply until the file was opened by hand. This is the moment to catch that,
- * and `.termigo/memory.md` is where to remove it.
+ * and `.zedcode/memory.md` is where to remove it.
  */
 const MemoryNotice = memo(function MemoryNotice({
   fact,
@@ -324,7 +324,7 @@ const MemoryNotice = memo(function MemoryNotice({
         {" — "}
         {fact}
         <span className="mt-0.5 block opacity-70">
-          Kept in .termigo/memory.md and added to every later run. Edit or
+          Kept in .zedcode/memory.md and added to every later run. Edit or
           delete it there.
         </span>
       </span>
@@ -458,7 +458,7 @@ const RenderedMessage = memo(function RenderedMessage({
       .map((p) => p.text)
       .join("\n");
 
-    const cmdMatch = rawText.match(TERMIGO_CMD_RE);
+    const cmdMatch = rawText.match(ZEDCODE_CMD_RE);
     const commandName = cmdMatch?.[1] ?? null;
     const withoutCmd = cmdMatch ? rawText.slice(cmdMatch[0].length) : rawText;
     const stripped = stripUserContextBlocks(withoutCmd);
@@ -682,7 +682,7 @@ const ReadGroup = memo(function ReadGroup({ parts }: { parts: AnyPart[] }) {
           </span>
         ) : null}
       </CollapsibleTrigger>
-      <CollapsibleContent className="termigo-collapsible-content border-t border-border/30">
+      <CollapsibleContent className="zedcode-collapsible-content border-t border-border/30">
         <ul className="flex flex-col gap-0.5 px-2 py-1.5">
           {paths.map((path) => (
             <li

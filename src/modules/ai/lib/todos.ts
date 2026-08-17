@@ -23,7 +23,7 @@ export type TodoRecord = {
 
 export const EMPTY_RECORD: TodoRecord = { workspaceRoot: null, items: [] };
 
-const STORE_PATH = "termigo-ai-todos.json";
+const STORE_PATH = "zedcode-ai-todos.json";
 const todosKey = (sessionId: string) => `todos:${sessionId}`;
 
 const store = new LazyStore(STORE_PATH, { defaults: {}, autoSave: 200 });

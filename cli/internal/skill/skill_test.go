@@ -42,8 +42,8 @@ func TestParseInvalidFrontmatter(t *testing.T) {
 
 func TestCreateAndDiscover(t *testing.T) {
 	workspace := t.TempDir()
-	home := filepath.Join(t.TempDir(), "termigo-home")
-	t.Setenv("TERMIGO_HOME", home)
+	home := filepath.Join(t.TempDir(), "zedcode-home")
+	t.Setenv("ZEDCODE_HOME", home)
 
 	created, err := Create(workspace, "Code Review", "Review diffs before commit.")
 	if err != nil {

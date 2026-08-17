@@ -59,7 +59,7 @@ pub struct InstallOutcome {
 }
 
 /// High-level stage the install is in. Reported by the install pipeline
-/// to any caller that wants a progress UI (currently the `termigo ext` TUI).
+/// to any caller that wants a progress UI (currently the `zedcode ext` TUI).
 /// `Downloading` is emitted by the network layer *before* `install_from_bytes`
 /// runs, so the trait carries it too for a single channel of phase events.
 #[derive(Debug, Clone)]
@@ -166,14 +166,14 @@ pub fn install_from_bytes_with_progress(
 
     // Engine-compat gate. Refuse to install an extension that asks for a
     // newer host than this binary. The host version comes from Cargo.toml
-    // at compile time; the constraint comes from `manifest.engines.termigo`
+    // at compile time; the constraint comes from `manifest.engines.zedcode`
     // and is parsed by [`super::version::satisfies`].
-    if let Some(req) = manifest.engines.as_ref().and_then(|e| e.termigo.as_deref()) {
+    if let Some(req) = manifest.engines.as_ref().and_then(|e| e.zedcode.as_deref()) {
         let host = env!("CARGO_PKG_VERSION");
         if !super::version::satisfies(req, host) {
             let _ = fs::remove_dir_all(&staging);
             return Err(format!(
-                "{} requires Termigo {req}, but this host is {host}. Update Termigo to install.",
+                "{} requires ZedCode {req}, but this host is {host}. Update ZedCode to install.",
                 manifest.name
             ));
         }

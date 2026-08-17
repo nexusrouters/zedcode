@@ -12,19 +12,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/99apps-id/termigo/cli/internal/agent"
-	"github.com/99apps-id/termigo/cli/internal/config"
-	"github.com/99apps-id/termigo/cli/internal/doctor"
-	"github.com/99apps-id/termigo/cli/internal/initcmd"
-	"github.com/99apps-id/termigo/cli/internal/mcp"
-	"github.com/99apps-id/termigo/cli/internal/skill"
+	"github.com/nexusrouters/zedcode/cli/internal/agent"
+	"github.com/nexusrouters/zedcode/cli/internal/config"
+	"github.com/nexusrouters/zedcode/cli/internal/doctor"
+	"github.com/nexusrouters/zedcode/cli/internal/initcmd"
+	"github.com/nexusrouters/zedcode/cli/internal/mcp"
+	"github.com/nexusrouters/zedcode/cli/internal/skill"
 )
 
 var version = "dev"
 
 func main() {
 	if err := run(os.Args[1:], os.Stdout, os.Stderr); err != nil {
-		fmt.Fprintln(os.Stderr, "termigo:", err)
+		fmt.Fprintln(os.Stderr, "zedcode:", err)
 		os.Exit(1)
 	}
 }
@@ -37,7 +37,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 
 	switch args[0] {
 	case "version", "--version", "-v":
-		_, err := fmt.Fprintf(stdout, "termigo %s (%s/%s)\n", version, runtime.GOOS, runtime.GOARCH)
+		_, err := fmt.Fprintf(stdout, "zedcode %s (%s/%s)\n", version, runtime.GOOS, runtime.GOARCH)
 		return err
 	case "doctor":
 		return runDoctor(args[1:], stdout)
@@ -52,7 +52,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 	case "config":
 		return runConfig(args[1:], stdout)
 	default:
-		return fmt.Errorf("unknown command %q; run 'termigo help'", args[0])
+		return fmt.Errorf("unknown command %q; run 'zedcode help'", args[0])
 	}
 }
 
@@ -87,14 +87,14 @@ func currentWorkspace(workspace string) string {
 }
 
 func writeUsage(stdout io.Writer) {
-	_, _ = fmt.Fprint(stdout, `Termigo CLI - the command-line companion for the Termigo workspace.
+	_, _ = fmt.Fprint(stdout, `ZedCode CLI - the command-line companion for the ZedCode workspace.
 
 Usage:
-  termigo <command> [options]
+  zedcode <command> [options]
 
 Commands:
   doctor [--json]                  Inspect local development and agent tools
-  init [dir]                       Scaffold .termigo/ and TERMIGO.md in a workspace
+  init [dir]                       Scaffold .zedcode/ and ZEDCODE.md in a workspace
   agent list                       List agent providers and their availability
   agent run <provider> "task"      Run a task through a local agent provider
   skill list [--json]              List project and user skills
@@ -115,7 +115,7 @@ Common options:
   -w, --workspace <dir>            Use a specific workspace (default: current dir)
 
 Agent providers: codex, claude, gemini, antigravity, ollama (local).
-Skills live in .termigo/skills/<name>/SKILL.md; MCP servers in .termigo/mcp.json.
+Skills live in .zedcode/skills/<name>/SKILL.md; MCP servers in .zedcode/mcp.json.
 The CLI never stores API keys; provider credentials stay with their own CLIs.
 `)
 }
@@ -127,7 +127,7 @@ func runDoctor(args []string, stdout io.Writer) error {
 		case "--json":
 			jsonOutput = true
 		case "--help", "-h":
-			_, err := fmt.Fprintln(stdout, "Usage: termigo doctor [--json]")
+			_, err := fmt.Fprintln(stdout, "Usage: zedcode doctor [--json]")
 			return err
 		default:
 			return fmt.Errorf("unknown doctor option %q", arg)
@@ -141,7 +141,7 @@ func runDoctor(args []string, stdout io.Writer) error {
 		return encoder.Encode(report)
 	}
 
-	_, _ = fmt.Fprintf(stdout, "Termigo doctor (%s/%s)\n\n", report.OS, report.Arch)
+	_, _ = fmt.Fprintf(stdout, "ZedCode doctor (%s/%s)\n\n", report.OS, report.Arch)
 	for _, tool := range report.Tools {
 		state := "missing"
 		if tool.Available {
@@ -180,8 +180,8 @@ func runInit(args []string, stdout io.Writer) error {
 	for _, created := range result.Created {
 		_, _ = fmt.Fprintf(stdout, "  created %s\n", created)
 	}
-	_, _ = fmt.Fprintln(stdout, "\nNext: run 'termigo mcp add <name> <command>' to register an MCP server,")
-	_, _ = fmt.Fprintln(stdout, "or add skills under .termigo/skills/<name>/SKILL.md.")
+	_, _ = fmt.Fprintln(stdout, "\nNext: run 'zedcode mcp add <name> <command>' to register an MCP server,")
+	_, _ = fmt.Fprintln(stdout, "or add skills under .zedcode/skills/<name>/SKILL.md.")
 	return nil
 }
 
@@ -192,9 +192,9 @@ func runAgent(args []string, stdout, stderr io.Writer) error {
 	}
 	if len(rest) == 0 || rest[0] == "help" || rest[0] == "--help" || rest[0] == "-h" {
 		_, _ = fmt.Fprintln(stdout, `Usage:
-  termigo agent list
-  termigo agent run <provider> [flags] "task"
-  termigo agent <provider> [flags] "task"      (shorthand)
+  zedcode agent list
+  zedcode agent run <provider> [flags] "task"
+  zedcode agent <provider> [flags] "task"      (shorthand)
 
 Flags:
   --access <read-only|workspace-write>  Sandbox for the run (default: read-only)
@@ -275,11 +275,11 @@ Flags:
 		ctx, cancel = context.WithTimeout(ctx, options.Timeout)
 		defer cancel()
 	}
-	_, _ = fmt.Fprintf(stdout, "termigo agent: %s -> %s (access: %s)\n", providerID, options.Workspace, options.Access)
+	_, _ = fmt.Fprintf(stdout, "zedcode agent: %s -> %s (access: %s)\n", providerID, options.Workspace, options.Access)
 	if err := agent.Run(ctx, providerID, options, stdout, stderr); err != nil {
 		return err
 	}
-	_, _ = fmt.Fprintln(stdout, "\ntermigo agent: done.")
+	_, _ = fmt.Fprintln(stdout, "\nzedcode agent: done.")
 	return nil
 }
 
@@ -298,9 +298,9 @@ func runSkill(args []string, stdout io.Writer) error {
 	workspace = currentWorkspace(workspace)
 	if len(rest) == 0 || rest[0] == "help" || rest[0] == "--help" || rest[0] == "-h" {
 		_, _ = fmt.Fprintln(stdout, `Usage:
-  termigo skill list [--json]
-  termigo skill show <name>
-  termigo skill create <name> [description]
+  zedcode skill list [--json]
+  zedcode skill show <name>
+  zedcode skill create <name> [description]
   -w, --workspace <dir>   Workspace directory`)
 		return nil
 	}
@@ -324,7 +324,7 @@ func runSkill(args []string, stdout io.Writer) error {
 		}
 		_, _ = fmt.Fprintf(stdout, "Skills for %s\n", workspace)
 		if len(skills) == 0 {
-			_, _ = fmt.Fprintln(stdout, "  (none - create one with 'termigo skill create <name>')")
+			_, _ = fmt.Fprintln(stdout, "  (none - create one with 'zedcode skill create <name>')")
 			return nil
 		}
 		for _, found := range skills {
@@ -334,7 +334,7 @@ func runSkill(args []string, stdout io.Writer) error {
 
 	case "show":
 		if len(rest) < 2 {
-			return errors.New("usage: termigo skill show <name>")
+			return errors.New("usage: zedcode skill show <name>")
 		}
 		found, err := skill.Load(workspace, rest[1])
 		if err != nil {
@@ -348,9 +348,9 @@ func runSkill(args []string, stdout io.Writer) error {
 
 	case "create":
 		if len(rest) < 2 {
-			return errors.New("usage: termigo skill create <name> [description]")
+			return errors.New("usage: zedcode skill create <name> [description]")
 		}
-		description := "A Termigo skill."
+		description := "A ZedCode skill."
 		if len(rest) > 2 {
 			description = strings.Join(rest[2:], " ")
 		}
@@ -374,12 +374,12 @@ func runMCP(args []string, stdout io.Writer) error {
 	workspace = currentWorkspace(workspace)
 	if len(rest) == 0 || rest[0] == "help" || rest[0] == "--help" || rest[0] == "-h" {
 		_, _ = fmt.Fprintln(stdout, `Usage:
-  termigo mcp list [--json]
-  termigo mcp tools [server] [--json]
-  termigo mcp call <server> <tool> [key=value ...]
-  termigo mcp add <name> <command> [args ...]
-  termigo mcp remove <name>
-  termigo mcp ping <server>
+  zedcode mcp list [--json]
+  zedcode mcp tools [server] [--json]
+  zedcode mcp call <server> <tool> [key=value ...]
+  zedcode mcp add <name> <command> [args ...]
+  zedcode mcp remove <name>
+  zedcode mcp ping <server>
   -w, --workspace <dir>   Workspace directory`)
 		return nil
 	}
@@ -421,19 +421,19 @@ func runMCP(args []string, stdout io.Writer) error {
 
 	case "ping":
 		if len(rest) < 2 {
-			return errors.New("usage: termigo mcp ping <server>")
+			return errors.New("usage: zedcode mcp ping <server>")
 		}
 		return pingMCPServer(ctxForCLI(), workspace, rest[1], stdout)
 
 	case "call":
 		if len(rest) < 3 {
-			return errors.New("usage: termigo mcp call <server> <tool> [key=value ...]")
+			return errors.New("usage: zedcode mcp call <server> <tool> [key=value ...]")
 		}
 		return callMCPTool(ctxForCLI(), workspace, rest[1], rest[2], rest[3:], stdout)
 
 	case "add":
 		if len(rest) < 3 {
-			return errors.New("usage: termigo mcp add <name> <command> [args ...]")
+			return errors.New("usage: zedcode mcp add <name> <command> [args ...]")
 		}
 		server := config.MCPServer{Command: rest[2], Args: rest[3:]}
 		added, err := mcp.Add(workspace, rest[1], server)
@@ -445,7 +445,7 @@ func runMCP(args []string, stdout io.Writer) error {
 
 	case "remove", "rm":
 		if len(rest) < 2 {
-			return errors.New("usage: termigo mcp remove <name>")
+			return errors.New("usage: zedcode mcp remove <name>")
 		}
 		if err := mcp.Remove(workspace, rest[1]); err != nil {
 			return err
@@ -573,7 +573,7 @@ func findServer(registry mcp.Registry, name string) (mcp.Server, error) {
 			return server, nil
 		}
 	}
-	return mcp.Server{}, fmt.Errorf("MCP server %q not found (see 'termigo mcp list')", name)
+	return mcp.Server{}, fmt.Errorf("MCP server %q not found (see 'zedcode mcp list')", name)
 }
 
 func runConfig(args []string, stdout io.Writer) error {
@@ -591,7 +591,7 @@ func runConfig(args []string, stdout io.Writer) error {
 	switch args[0] {
 	case "set":
 		if len(args) < 3 {
-			return errors.New("usage: termigo config set <key> <value>")
+			return errors.New("usage: zedcode config set <key> <value>")
 		}
 		key, value := args[1], args[2]
 		switch key {
@@ -611,7 +611,7 @@ func runConfig(args []string, stdout io.Writer) error {
 
 	case "provider":
 		if len(args) < 4 {
-			return errors.New("usage: termigo config provider <id> <key> <value> (keys: command, model, endpoint)")
+			return errors.New("usage: zedcode config provider <id> <key> <value> (keys: command, model, endpoint)")
 		}
 		id, key, value := args[1], args[2], args[3]
 		if _, err := agent.Find(id); err != nil {

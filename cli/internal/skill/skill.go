@@ -1,9 +1,9 @@
-// Package skill discovers and manages Termigo skills.
+// Package skill discovers and manages ZedCode skills.
 //
 // A skill is a folder containing a SKILL.md file with YAML frontmatter and,
 // optionally, helper scripts. Skills are project-scoped when stored under
-// <workspace>/.termigo/skills/<name>/SKILL.md and user-scoped when stored
-// under <termigo-home>/skills/<name>/SKILL.md.
+// <workspace>/.zedcode/skills/<name>/SKILL.md and user-scoped when stored
+// under <zedcode-home>/skills/<name>/SKILL.md.
 //
 // Format:
 //
@@ -59,7 +59,7 @@ const frontmatterDelimiter = "---"
 func Discover(workspace string) ([]Skill, error) {
 	var skills []Skill
 	if workspace != "" {
-		project, err := fromFolder(filepath.Join(workspace, ".termigo", "skills"), "project")
+		project, err := fromFolder(filepath.Join(workspace, ".zedcode", "skills"), "project")
 		if err != nil {
 			return nil, err
 		}
@@ -91,7 +91,7 @@ func Load(workspace, name string) (Skill, error) {
 	return Skill{}, fmt.Errorf("skill %q not found (looked in the workspace and %s)", name, userSkillsDir())
 }
 
-// Create scaffolds a new project-scoped skill in <workspace>/.termigo/skills.
+// Create scaffolds a new project-scoped skill in <workspace>/.zedcode/skills.
 func Create(workspace, name, description string) (Skill, error) {
 	if workspace == "" {
 		return Skill{}, errors.New("a workspace is required to create a project skill")
@@ -104,12 +104,12 @@ func Create(workspace, name, description string) (Skill, error) {
 		return Skill{}, errors.New("skill name must not be empty")
 	}
 	if description == "" {
-		description = "A Termigo skill."
+		description = "A ZedCode skill."
 	}
 
 	// Check for a conflict before creating anything, so a rejected create does
 	// not leave an empty skill folder behind.
-	dir := filepath.Join(workspace, ".termigo", "skills", name)
+	dir := filepath.Join(workspace, ".zedcode", "skills", name)
 	document := filepath.Join(dir, "SKILL.md")
 	if _, err := os.Stat(document); err == nil {
 		return Skill{}, fmt.Errorf("skill %q already exists at %s", name, document)
@@ -238,14 +238,14 @@ func userSkills() ([]Skill, error) {
 }
 
 func userSkillsDir() string {
-	home := os.Getenv("TERMIGO_HOME")
+	home := os.Getenv("ZEDCODE_HOME")
 	if home == "" {
 		if base, err := os.UserHomeDir(); err == nil {
-			home = filepath.Join(base, ".termigo")
+			home = filepath.Join(base, ".zedcode")
 		}
 	}
 	if home == "" {
-		return ".termigo/skills"
+		return ".zedcode/skills"
 	}
 	return filepath.Join(home, "skills")
 }

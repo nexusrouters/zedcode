@@ -11,12 +11,12 @@ import { nord } from "./nord";
 import { rosePine } from "./rose-pine";
 import { sage } from "./sage";
 import { solarized } from "./solarized";
-import { termigoDefault } from "./termigo-default";
+import { zedcodeDefault } from "./zedcode-default";
 import { tide } from "./tide";
 import { tokyoNight } from "./tokyo-night";
 
 const BUILTIN: Theme[] = [
-  termigoDefault,
+  zedcodeDefault,
   claude,
   kanagawa,
   kanagawaDragon,

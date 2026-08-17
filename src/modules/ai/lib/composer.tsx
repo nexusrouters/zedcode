@@ -123,8 +123,8 @@ export function AiComposerProvider({ children }: ProviderProps) {
         void attachFileByPath(path);
       }
     };
-    window.addEventListener("termigo:ai-attach-file", onAttach);
-    return () => window.removeEventListener("termigo:ai-attach-file", onAttach);
+    window.addEventListener("zedcode:ai-attach-file", onAttach);
+    return () => window.removeEventListener("zedcode:ai-attach-file", onAttach);
     // attachFileByPath is stable for our purposes (closes over setFiles only)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -238,7 +238,7 @@ export function AiComposerProvider({ children }: ProviderProps) {
       return;
 
     // Slash-command interception. `/plan` toggles plan mode; `/init` rewrites
-    // the prompt to the TERMIGO.md scan template before sending.
+    // the prompt to the ZEDCODE.md scan template before sending.
     let effectiveText = trimmed;
     let commandMarker: string | null = null;
     let commandSource = trimmed;
@@ -255,7 +255,7 @@ export function AiComposerProvider({ children }: ProviderProps) {
       if (outcome.kind === "send-prompt") {
         effectiveText = outcome.prompt;
         if (outcome.commandName) {
-          commandMarker = `<termigo-command name="${outcome.commandName}" />`;
+          commandMarker = `<zedcode-command name="${outcome.commandName}" />`;
         }
       }
     }

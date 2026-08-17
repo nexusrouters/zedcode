@@ -788,8 +788,8 @@ export function useTabs(initial?: Partial<TerminalTab>) {
   useEffect(() => {
     if (!import.meta.env?.DEV || typeof window === "undefined") return;
     (
-      window as unknown as { __termigoNewBlockTab?: (cwd?: string) => number }
-    ).__termigoNewBlockTab = newBlockTab;
+      window as unknown as { __zedcodeNewBlockTab?: (cwd?: string) => number }
+    ).__zedcodeNewBlockTab = newBlockTab;
   }, [newBlockTab]);
 
   const newAgentGroupTab = useCallback(

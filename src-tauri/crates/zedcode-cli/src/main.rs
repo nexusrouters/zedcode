@@ -8,7 +8,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use serde_json::{json, Value};
-use termigo_control_protocol::{
+use zedcode_control_protocol::{
     CallerContext, ControlDescriptor, ControlRequest, ControlResponse, OpenParams,
     MAX_MESSAGE_BYTES, METHOD_CAPABILITIES, METHOD_IDENTIFY, METHOD_OPEN, METHOD_PING,
     PROTOCOL_VERSION, SERVER_RESPONSE_ID,
@@ -67,7 +67,7 @@ fn main() -> ExitCode {
                     })
                 );
             } else {
-                eprintln!("termigo: {}", error.message);
+                eprintln!("zedcode: {}", error.message);
             }
             ExitCode::from(error.exit)
         }
@@ -82,12 +82,12 @@ fn run(args: Vec<OsString>) -> Result<(), CliError> {
             Ok(())
         }
         Action::Version => {
-            println!("termigo {}", env!("CARGO_PKG_VERSION"));
+            println!("zedcode {}", env!("CARGO_PKG_VERSION"));
             Ok(())
         }
         Action::Request { method, params } => {
             let endpoint = load_endpoint()?;
-            let caller = env::var("TERMIGO_PANE_ID")
+            let caller = env::var("ZEDCODE_PANE_ID")
                 .ok()
                 .and_then(|value| value.parse::<u32>().ok());
             let request = ControlRequest {
@@ -101,9 +101,9 @@ fn run(args: Vec<OsString>) -> Result<(), CliError> {
             let response = send_request(&endpoint.address, &request)?;
             if !response.ok {
                 let error = response.error.unwrap_or_else(|| {
-                    termigo_control_protocol::ControlError::new(
+                    zedcode_control_protocol::ControlError::new(
                         "request_failed",
-                        "Termigo rejected the request",
+                        "ZedCode rejected the request",
                     )
                 });
                 return Err(CliError::new(error.code, error.message, EXIT_REQUEST));
@@ -140,9 +140,9 @@ fn parse_args(mut args: Vec<OsString>) -> Result<Config, CliError> {
         Some(value) if value.starts_with('-') => {
             return Err(usage_error(format!("unknown option '{value}'")));
         }
-        // `termigo <file>` is shorthand for `termigo open <file>`. Only take
+        // `zedcode <file>` is shorthand for `zedcode open <file>`. Only take
         // that branch for something that actually looks like a path: otherwise
-        // a mistyped or companion-CLI command (`termigo agent list`) was
+        // a mistyped or companion-CLI command (`zedcode agent list`) was
         // reported as "open accepts exactly one file path", which says nothing
         // about the real mistake.
         _ if looks_like_path(&command) => {
@@ -183,16 +183,16 @@ fn unknown_command_error(command: &OsString) -> CliError {
     let name = command.to_string_lossy();
     let mut message = format!(
         "unknown command '{name}'\n\n\
-         This is the Termigo control CLI. It supports: open, ping, capabilities, \
+         This is the ZedCode control CLI. It supports: open, ping, capabilities, \
          identify, version, help.\n\
-         Run 'termigo help' for usage, or pass a file path to open it."
+         Run 'zedcode help' for usage, or pass a file path to open it."
     );
     if COMPANION_COMMANDS.contains(&name.as_ref()) {
         message = format!(
-            "'{name}' belongs to the Termigo Go companion CLI, not to this control CLI.\n\n\
-             Build it with:  cd cli && go build -o termi-go ./cmd/termigo\n\
-             Then run:       termi-go {name} --help\n\n\
-             This binary controls a running Termigo window: open, ping, capabilities, \
+            "'{name}' belongs to the ZedCode Go companion CLI, not to this control CLI.\n\n\
+             Build it with:  cd cli && go build -o zedcode ./cmd/zedcode\n\
+             Then run:       zedcode {name} --help\n\n\
+             This binary controls a running ZedCode window: open, ping, capabilities, \
              identify, version, help."
         );
     }
@@ -288,7 +288,7 @@ fn parse_open(args: Vec<OsString>) -> Result<Action, CliError> {
     let path = canonical.into_os_string().into_string().map_err(|_| {
         CliError::new(
             "non_utf8_path",
-            "Termigo cannot open a path that is not valid UTF-8",
+            "ZedCode cannot open a path that is not valid UTF-8",
             EXIT_USAGE,
         )
     })?;
@@ -316,8 +316,8 @@ fn usage_error(message: impl Into<String>) -> CliError {
 }
 
 fn load_endpoint() -> Result<ControlDescriptor, CliError> {
-    let env_address = env::var("TERMIGO_CONTROL_ADDR").ok();
-    let env_token = env::var("TERMIGO_CONTROL_TOKEN").ok();
+    let env_address = env::var("ZEDCODE_CONTROL_ADDR").ok();
+    let env_token = env::var("ZEDCODE_CONTROL_TOKEN").ok();
     let (descriptor, require_live_process) = match (env_address, env_token) {
         (Some(address), Some(token)) => (
             ControlDescriptor {
@@ -331,7 +331,7 @@ fn load_endpoint() -> Result<ControlDescriptor, CliError> {
         ),
         (None, None) => {
             let path = dirs::cache_dir()
-                .map(|dir| dir.join("termigo").join("control.json"))
+                .map(|dir| dir.join("zedcode").join("control.json"))
                 .ok_or_else(|| {
                     CliError::new(
                         "app_unavailable",
@@ -342,14 +342,14 @@ fn load_endpoint() -> Result<ControlDescriptor, CliError> {
             let bytes = std::fs::read(&path).map_err(|_| {
                 CliError::new(
                     "app_unavailable",
-                    "Termigo is not running; start the app and try again",
+                    "ZedCode is not running; start the app and try again",
                     EXIT_UNAVAILABLE,
                 )
             })?;
             let descriptor = serde_json::from_slice(&bytes).map_err(|error| {
                 CliError::new(
                     "invalid_descriptor",
-                    format!("invalid Termigo control descriptor: {error}"),
+                    format!("invalid ZedCode control descriptor: {error}"),
                     EXIT_PROTOCOL,
                 )
             })?;
@@ -358,7 +358,7 @@ fn load_endpoint() -> Result<ControlDescriptor, CliError> {
         _ => {
             return Err(CliError::new(
                 "invalid_environment",
-                "TERMIGO_CONTROL_ADDR and TERMIGO_CONTROL_TOKEN must be set together",
+                "ZEDCODE_CONTROL_ADDR and ZEDCODE_CONTROL_TOKEN must be set together",
                 EXIT_PROTOCOL,
             ));
         }
@@ -374,7 +374,7 @@ fn validate_endpoint(
         return Err(CliError::new(
             "unsupported_protocol",
             format!(
-                "Termigo uses control protocol {}, but this CLI supports {PROTOCOL_VERSION}",
+                "ZedCode uses control protocol {}, but this CLI supports {PROTOCOL_VERSION}",
                 descriptor.protocol
             ),
             EXIT_PROTOCOL,
@@ -388,7 +388,7 @@ fn validate_endpoint(
     {
         return Err(CliError::new(
             "invalid_endpoint",
-            "Termigo control token is invalid",
+            "ZedCode control token is invalid",
             EXIT_PROTOCOL,
         ));
     }
@@ -396,7 +396,7 @@ fn validate_endpoint(
     if require_live_process && !process_is_alive(descriptor.pid) {
         return Err(CliError::new(
             "invalid_endpoint",
-            "Termigo control process is not running",
+            "ZedCode control process is not running",
             EXIT_PROTOCOL,
         ));
     }
@@ -439,7 +439,7 @@ fn send_request(address: &str, request: &ControlRequest) -> Result<ControlRespon
     let mut stream = TcpStream::connect_timeout(&address, CONNECT_TIMEOUT).map_err(|error| {
         CliError::new(
             "app_unavailable",
-            format!("could not connect to Termigo: {error}"),
+            format!("could not connect to ZedCode: {error}"),
             EXIT_UNAVAILABLE,
         )
     })?;
@@ -455,14 +455,14 @@ fn parse_loopback_address(address: &str) -> Result<SocketAddr, CliError> {
     let address: SocketAddr = address.parse().map_err(|error| {
         CliError::new(
             "invalid_endpoint",
-            format!("invalid Termigo control address: {error}"),
+            format!("invalid ZedCode control address: {error}"),
             EXIT_PROTOCOL,
         )
     })?;
     if !address.ip().is_loopback() {
         return Err(CliError::new(
             "invalid_endpoint",
-            "Termigo control address must be loopback-only",
+            "ZedCode control address must be loopback-only",
             EXIT_PROTOCOL,
         ));
     }
@@ -494,21 +494,21 @@ fn read_response(
     if bytes.len() > MAX_MESSAGE_BYTES {
         return Err(CliError::new(
             "message_too_large",
-            "Termigo response exceeded the protocol limit",
+            "ZedCode response exceeded the protocol limit",
             EXIT_PROTOCOL,
         ));
     }
     if bytes.last() != Some(&b'\n') {
         return Err(CliError::new(
             "invalid_response",
-            "Termigo returned an incomplete response",
+            "ZedCode returned an incomplete response",
             EXIT_PROTOCOL,
         ));
     }
     let response: ControlResponse = serde_json::from_slice(&bytes).map_err(|error| {
         CliError::new(
             "invalid_response",
-            format!("Termigo returned invalid JSON: {error}"),
+            format!("ZedCode returned invalid JSON: {error}"),
             EXIT_PROTOCOL,
         )
     })?;
@@ -517,7 +517,7 @@ fn read_response(
     if response.protocol != PROTOCOL_VERSION || !matched_id {
         return Err(CliError::new(
             "invalid_response",
-            "Termigo returned a mismatched protocol version or request id",
+            "ZedCode returned a mismatched protocol version or request id",
             EXIT_PROTOCOL,
         ));
     }
@@ -552,7 +552,7 @@ fn print_result(method: &str, result: Value, as_json: bool) {
                 .get("app_version")
                 .and_then(Value::as_str)
                 .unwrap_or("unknown");
-            println!("Termigo {version} is running");
+            println!("ZedCode {version} is running");
         }
         METHOD_CAPABILITIES => {
             if let Some(methods) = result.get("methods").and_then(Value::as_array) {
@@ -580,9 +580,9 @@ fn print_result(method: &str, result: Value, as_json: bool) {
             let path = result.get("path").and_then(Value::as_str).unwrap_or("");
             let line = result.get("line").and_then(Value::as_u64);
             if let Some(line) = line {
-                println!("Opened {path}:{line} in Termigo");
+                println!("Opened {path}:{line} in ZedCode");
             } else {
-                println!("Opened {path} in Termigo");
+                println!("Opened {path} in ZedCode");
             }
         }
         _ => println!("{result}"),
@@ -591,9 +591,9 @@ fn print_result(method: &str, result: Value, as_json: bool) {
 
 fn print_help() {
     println!(
-        "Termigo command line interface\n\n\
-Usage:\n  termigo <file> [--line <n>] [--no-focus] [--json]\n  termigo open <file> [--line <n>] [--no-focus] [--json]\n  termigo ping [--json]\n  termigo capabilities [--json]\n  termigo identify [--json]\n  termigo --version\n\n\
-The app must be running. Commands launched in a Termigo pane target that pane's space."
+        "ZedCode command line interface\n\n\
+Usage:\n  zedcode <file> [--line <n>] [--no-focus] [--json]\n  zedcode open <file> [--line <n>] [--no-focus] [--json]\n  zedcode ping [--json]\n  zedcode capabilities [--json]\n  zedcode identify [--json]\n  zedcode --version\n\n\
+The app must be running. Commands launched in a ZedCode pane target that pane's space."
     );
 }
 

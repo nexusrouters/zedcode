@@ -35,13 +35,13 @@
   "bundle": {
     "active": true,
     "externalBin": [
-      "binaries/termigo-cli"
+      "binaries/zedcode-cli"
     ],
     "targets": "all",
     "createUpdaterArtifacts": false,
-    "copyright": "Copyright 2026 99apps-id (fork of Terax by Crynta)",
+    "copyright": "Copyright 2026 nexusrouters (fork of Terax by Crynta)",
     "license": "Apache-2.0",
-    "publisher": "99apps-id",
+    "publisher": "nexusrouters",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -161,7 +161,7 @@
       "active": false,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDNCQUJGRDhBQjYwRTM0NjkKUldScE5BNjJpdjJyT3dIN0dqbUpHaDA4QW1GaDVmTTllRXdZVk96dFNTRUZ3Y2hiVGszYjFqRloK",
       "endpoints": [
-        "https://github.com/99apps-id/termigo/releases/latest/download/latest.json"
+        "https://github.com/nexusrouters/zedcode/releases/latest/download/latest.json"
       ]
     }
   },

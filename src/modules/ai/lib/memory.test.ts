@@ -90,7 +90,7 @@ describe("prompt block", () => {
 
   it("labels the source and marks the facts as context, not orders", () => {
     const block = memoryBlock([entry("Deploy uses pnpm tauri build.")]);
-    expect(block).toContain(".termigo/memory.md");
+    expect(block).toContain(".zedcode/memory.md");
     expect(block).toContain("Deploy uses pnpm tauri build.");
     // A stale memory must never outrank what the user is saying right now.
     expect(block.toLowerCase()).toContain("prefer what the user says now");

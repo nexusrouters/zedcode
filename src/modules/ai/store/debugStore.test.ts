@@ -7,7 +7,7 @@ function capture(overrides: Partial<NewCapture> = {}): NewCapture {
   return {
     model: { id: "deepseek-v4-pro", provider: "deepseek" },
     params: { stepBudget: 25 },
-    system: [{ role: "system", content: "you are termigo" }],
+    system: [{ role: "system", content: "you are zedcode" }],
     messages: [{ role: "user", content: "hi" }],
     tools: [{ name: "read_file", description: "read a file" }],
     ...overrides,

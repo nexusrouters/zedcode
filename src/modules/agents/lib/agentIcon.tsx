@@ -51,7 +51,7 @@ export function AgentIcon({
   if (agent.toLowerCase() === "pi") {
     return <PiIcon size={size} className={className} />;
   }
-  if (agent.toLowerCase().includes("termigo")) {
+  if (agent.toLowerCase().includes("zedcode")) {
     return (
       <img
         src="/logo.png"

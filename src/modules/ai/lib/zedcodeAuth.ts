@@ -20,7 +20,7 @@ export const ZEDCODE_API_BASE = "https://api.zedmux.tech";
 export const ZEDCODE_V1_BASE = `${ZEDCODE_API_BASE}/v1`;
 const CLIENT_ID = "zedcode";
 
-// Keychain accounts (service is the shared termigo-ai keyring).
+// Keychain accounts (service is the shared zedcode-ai keyring).
 const ACCOUNT_TOKEN = "zedcode-token"; // access JWT
 const ACCOUNT_REFRESH = "zedcode-refresh"; // refresh token
 const ACCOUNT_EXP = "zedcode-token-exp"; // access-token expiry, epoch ms

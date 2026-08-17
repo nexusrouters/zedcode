@@ -40,7 +40,7 @@ export const MAX_SKILL_MATCHES = 8;
 
 /** Skill libraries other agents keep, relative to the home directory. */
 export const FOREIGN_ROOTS: { rel: string; source: SkillSource }[] = [
-  { rel: ".termigo/skills", source: "user" },
+  { rel: ".zedcode/skills", source: "user" },
   { rel: ".claude/skills", source: "claude" },
   { rel: ".openclaw/plugin-skills", source: "openclaw" },
   { rel: ".codex", source: "codex" },

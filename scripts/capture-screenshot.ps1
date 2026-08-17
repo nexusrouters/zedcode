@@ -1,6 +1,6 @@
 # Capture a PNG of a window by process name, for the README screenshots.
 #
-# Usage: powershell -File scripts/capture-screenshot.ps1 -Process termigo -Out docs/shot.png
+# Usage: powershell -File scripts/capture-screenshot.ps1 -Process zedcode -Out docs/shot.png
 #
 # WebView2 renders through DirectComposition, and PrintWindow returns a black
 # bitmap for those surfaces (intermittently - it can appear to work once). So
@@ -8,7 +8,7 @@
 # what is actually composited. Topmost is what makes that safe: without it the
 # read silently picks up whatever window happens to be in front.
 param(
-  [string]$Process = "termigo",
+  [string]$Process = "zedcode",
   [string]$Out = "docs/shot.png",
   [int]$Width = 0,
   [int]$Height = 0,

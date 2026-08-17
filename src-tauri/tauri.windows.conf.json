@@ -4,7 +4,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Termigo",
+        "title": "ZedCode",
         "decorations": false,
         "transparent": true,
         "visible": false,

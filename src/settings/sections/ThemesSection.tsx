@@ -171,13 +171,13 @@ export function ThemesSection() {
               className="h-7 px-2 text-[11px]"
               onClick={onPickThemeFile}
             >
-              Import .termigo-theme
+              Import .zedcode-theme
             </Button>
           </div>
           <input
             ref={fileInputRef}
             type="file"
-            accept=".termigo-theme,.json,application/json"
+            accept=".zedcode-theme,.json,application/json"
             className="hidden"
             onChange={(e) => {
               void handleThemeFiles(e.target.files);

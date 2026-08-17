@@ -1,4 +1,4 @@
-const DB_NAME = "termigo-bg-images";
+const DB_NAME = "zedcode-bg-images";
 const STORE = "images";
 const VERSION = 1;
 

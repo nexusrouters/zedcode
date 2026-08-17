@@ -17,9 +17,9 @@ type DistroKey = "arch" | "debian" | "fedora";
 function distroCommand(key: DistroKey, version: string): string {
   switch (key) {
     case "arch":
-      return "yay -S termigo-bin";
+      return "yay -S zedcode-bin";
     case "debian":
-      return `sudo apt install ./Termigo_${version}_amd64.deb`;
+      return `sudo apt install ./ZedCode_${version}_amd64.deb`;
     case "fedora":
       return `sudo dnf install ./ZedCode-${version}-1.x86_64.rpm`;
   }

@@ -1,12 +1,12 @@
-# TERMIGO.md
+# ZEDCODE.md
 
-Termigo loads `TERMIGO.md` from the workspace root as agent memory (like AGENTS.md / CLAUDE.md), and it is the project's living architecture doc. Only the first 10k characters reach the agent, so keep what matters here and put detail in `docs/`.
+ZedCode loads `ZEDCODE.md` from the workspace root as agent memory (like AGENTS.md / CLAUDE.md), and it is the project's living architecture doc. Only the first 10k characters reach the agent, so keep what matters here and put detail in `docs/`.
 
 ## Project
 
-**Termigo**: open-source AI-native terminal emulator. Tauri 2 + Rust (`portable-pty`) backend, React 19 + TypeScript + xterm.js (webgl) client, BYOK AI via Vercel AI SDK v6.
+**ZedCode**: open-source AI-native terminal emulator. Tauri 2 + Rust (`portable-pty`) backend, React 19 + TypeScript + xterm.js (webgl) client, BYOK AI via Vercel AI SDK v6.
 
-Bundle id `id.99apps.termigo`, package manager **pnpm**, platforms macOS / Linux / Windows.
+Bundle id `id.nexusrouters.zedcode`, package manager **pnpm**, platforms macOS / Linux / Windows.
 
 Checks: `pnpm lint`, `pnpm check-types`, `pnpm test`; and in `src-tauri/`, `cargo clippy --all-targets --locked -- -D warnings` and `cargo nextest run --locked` (fallback `cargo test --locked`).
 
@@ -34,7 +34,7 @@ A change to a core subsystem (terminal/shell spawn, workspace auth, git, fs, IPC
 - **No emojis** anywhere.
 - **Imports**: always `@/...` on the frontend, never relative across modules.
 - **pnpm only**, never npm/npx/yarn.
-- **Branding**: `termigo.png` at the repo root is the master logo and is an
+- **Branding**: `zedcode.png` at the repo root is the master logo and is an
   input, never generated. After changing it run `node scripts/generate-logo.mjs`
   to regenerate `public/logo.png` and the whole `src-tauri/icons` set; never
   hand-edit those. In the UI render the `/logo.png` asset, not a CSS lookalike.
@@ -75,7 +75,7 @@ One line each; every module in full, with the invariants that are easy to break,
 
 ### Go CLI (`cli/`)
 
-The Go companion (`cli/cmd/termigo`) is the automation layer: `doctor`, `init`, `agent run`, `skill`, `mcp` and `config`. Keep it dependency-light (stdlib + yaml.v3); provider credentials stay with their own CLIs.
+The Go companion (`cli/cmd/zedcode`) is the automation layer: `doctor`, `init`, `agent run`, `skill`, `mcp` and `config`. Keep it dependency-light (stdlib + yaml.v3); provider credentials stay with their own CLIs.
 
 ### AI subsystem (`src/modules/ai/`)
 
@@ -109,11 +109,11 @@ Per-platform window styling, the capability allowlist and bundle / updater confi
 ### Known gotchas
 
 - **React 19 strict mode** double-mounts `useEffect` in dev → terminals spawn twice on first render. The first PTY is cleaned up almost immediately. The `SPAWN_LOCK` mutex serializes this; don't be alarmed by `pty opened id=1` followed by `pty closed id=1` in dev logs.
-- **Windows PowerShell process lifecycle**: `killer.kill()` from `portable-pty` only kills the immediate child. Descendants (e.g. `npm run dev` started inside pwsh) survive unless something else takes them down. The Job Object in `pty/job.rs` handles this for the Termigo-process-death case; an explicit `pty_close` from JS also kills only the immediate child + relies on the Job to take the rest. Don't disable the Job without a replacement.
+- **Windows PowerShell process lifecycle**: `killer.kill()` from `portable-pty` only kills the immediate child. Descendants (e.g. `npm run dev` started inside pwsh) survive unless something else takes them down. The Job Object in `pty/job.rs` handles this for the ZedCode-process-death case; an explicit `pty_close` from JS also kills only the immediate child + relies on the Job to take the rest. Don't disable the Job without a replacement.
 - **Tab `cwd` storage**: comes from OSC 7 with forward slashes (after `parseOsc7` strips `/C:` → `C:`). Anything that consumes `tab.cwd` and passes it to a Rust fs command on Windows must normalize separators or accept both forms - `apply_common` in `pty::shell_init` handles this for PTY spawn; other call sites must do their own.
 
 ## Further reading
 
-Long-form contributor guides live under `docs/`. These guides elaborate on `TERMIGO.md`; if anything conflicts, `TERMIGO.md` wins.
+Long-form contributor guides live under `docs/`. These guides elaborate on `ZEDCODE.md`; if anything conflicts, `ZEDCODE.md` wins.
 
 `docs/README.md` indexes them. Under `docs/architecture/`: `module-layout` (every frontend module in full), `two-process-model` (IPC and command reference), `pty-shell-integration`, `ai-subsystem` (sub-agents, tools, approval, adding a provider), `security-model`, `platform-and-bundle`, `terminal-renderer-pool`, `cli-control`. Under `docs/contributing/`: `testing`.

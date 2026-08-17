@@ -163,7 +163,7 @@ export function useAiLiveBridge(params: Params) {
           if (result !== "ready") {
             if (result === "timeout") {
               console.warn(
-                "[termigo] Claude TUI did not appear in time; aborting prompt send",
+                "[zedcode] Claude TUI did not appear in time; aborting prompt send",
               );
             }
             useManagedAgentsStore.getState().remove(leafId);

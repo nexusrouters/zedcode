@@ -1,6 +1,6 @@
 # SSH & remote files
 
-Termigo connects to remote hosts over SSH directly from the terminal:
+ZedCode connects to remote hosts over SSH directly from the terminal:
 no separate app, no config file to hand-edit. The remote shell runs as a
 normal terminal tab, so splits, inline search, and the AI agent's context
 bridge all keep working.
@@ -23,7 +23,7 @@ the connection store on disk.
 
 ## Host-key verification (TOFU)
 
-The first time you connect to a host, Termigo shows its `SHA256:` fingerprint
+The first time you connect to a host, ZedCode shows its `SHA256:` fingerprint
 and **pauses the handshake before sending any credentials**. Verify the
 fingerprint out-of-band (ask the admin, or run
 `ssh-keygen -lf <hostkey>` on the server), then accept to pin it on the saved

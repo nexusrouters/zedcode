@@ -65,7 +65,7 @@ describe("wantsForcedFanout", () => {
   // The env block carries the workspace path, and this one literally contains
   // "project" - without stripping it first, every single turn looked broad.
   it("ignores breadth words coming from the injected env block", () => {
-    const env = "<env>\nworkspace_root: C:/project/termigo\n</env>";
+    const env = "<env>\nworkspace_root: C:/project/zedcode\n</env>";
     expect(wantsForcedFanout(`${env}\n\nexplain this line`)).toBe(false);
     expect(wantsForcedFanout(`${env}\n\npahami fungsi ini`)).toBe(false);
     // A real request still gets through with the block present.
@@ -97,7 +97,7 @@ describe("latestUserRequest", () => {
     role: "assistant" as const,
     content: text,
   });
-  const ENV = "<env>\nworkspace_root: C:/project/termigo\n</env>";
+  const ENV = "<env>\nworkspace_root: C:/project/zedcode\n</env>";
 
   it("skips a trailing env turn to find the real request", () => {
     expect(

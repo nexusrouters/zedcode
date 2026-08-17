@@ -116,7 +116,7 @@ export function SettingsApp() {
       }
     };
     const unlistenPromise = getCurrentWebviewWindow().listen<string>(
-      "termigo:settings-tab",
+      "zedcode:settings-tab",
       (e) => apply(e.payload),
     );
     return () => {

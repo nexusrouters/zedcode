@@ -7,7 +7,7 @@ import {
   referencedTools,
 } from "./skillDeps";
 
-const TERMIGO_TOOLS = ["read_file", "write_file", "bash_run", "list_directory"];
+const ZEDCODE_TOOLS = ["read_file", "write_file", "bash_run", "list_directory"];
 
 describe("declaredTools", () => {
   it("reads a comma-separated list", () => {
@@ -58,7 +58,7 @@ describe("checkSkillDependencies", () => {
   it("says nothing when the skill fits", () => {
     const deps = checkSkillDependencies(
       "tools: read_file\n\nUse `read_file` then `bash_run`.",
-      TERMIGO_TOOLS,
+      ZEDCODE_TOOLS,
     );
     expect(deps.missingDeclared).toEqual([]);
     expect(deps.missingReferenced).toEqual([]);
@@ -70,7 +70,7 @@ describe("checkSkillDependencies", () => {
   it("catches a skill written for another agent", () => {
     const deps = checkSkillDependencies(
       "Use `browser_click` on the ref, then `read_browser_console`.",
-      TERMIGO_TOOLS,
+      ZEDCODE_TOOLS,
     );
     expect(deps.missingReferenced).toEqual([
       "browser_click",
@@ -81,7 +81,7 @@ describe("checkSkillDependencies", () => {
   it("trusts a declaration over the guess, and does not repeat it", () => {
     const deps = checkSkillDependencies(
       "tools: browser_click\n\nUse `browser_click` twice.",
-      TERMIGO_TOOLS,
+      ZEDCODE_TOOLS,
     );
     expect(deps.missingDeclared).toEqual(["browser_click"]);
     expect(deps.missingReferenced).toEqual([]);
@@ -92,7 +92,7 @@ describe("checkSkillDependencies", () => {
   it("separates MCP tools from missing ones", () => {
     const deps = checkSkillDependencies(
       "Call `mcp__github__create_issue` when done.",
-      TERMIGO_TOOLS,
+      ZEDCODE_TOOLS,
     );
     expect(deps.mcpRequired).toEqual(["mcp__github__create_issue"]);
     expect(deps.missingReferenced).toEqual([]);
@@ -102,7 +102,7 @@ describe("checkSkillDependencies", () => {
 describe("dependencyWarning", () => {
   it("names what is missing and what to do instead", () => {
     const warning = dependencyWarning(
-      checkSkillDependencies("Use `browser_click`.", TERMIGO_TOOLS),
+      checkSkillDependencies("Use `browser_click`.", ZEDCODE_TOOLS),
     );
     expect(warning).toContain("browser_click");
     // Most imported skills are mostly applicable, so the model should adapt
@@ -113,7 +113,7 @@ describe("dependencyWarning", () => {
 
   it("mentions MCP separately, as configuration rather than absence", () => {
     const warning = dependencyWarning(
-      checkSkillDependencies("Call `mcp__db__query`.", TERMIGO_TOOLS),
+      checkSkillDependencies("Call `mcp__db__query`.", ZEDCODE_TOOLS),
     );
     expect(warning).toContain("mcp.json");
   });

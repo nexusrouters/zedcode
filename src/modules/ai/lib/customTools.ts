@@ -6,7 +6,7 @@
 // half-built sandbox is worse than none.
 //
 // So a custom tool here is not code. It is a shell command template with named
-// parameters, stored in `.termigo/tools.json`. Running one goes through the
+// parameters, stored in `.zedcode/tools.json`. Running one goes through the
 // same path bash_run already uses, which means checkShellCommand, the approval
 // tiers and the remote/local routing all apply unchanged. Nothing new can be
 // executed that could not be executed before; what changes is that a command
@@ -19,7 +19,7 @@
 
 import { shellQuote } from "./remoteSearch";
 
-export const TOOLS_REL_PATH = ".termigo/tools.json";
+export const TOOLS_REL_PATH = ".zedcode/tools.json";
 
 /** Custom tools are a shortcut, not a plugin system. */
 export const MAX_CUSTOM_TOOLS = 40;

@@ -262,7 +262,7 @@ export async function stopRun(): Promise<void> {
 
 
 // Summarise a session the user has left and append anything durable to
-// .termigo/memory.md. Registered here because this is the one place that can
+// .zedcode/memory.md. Registered here because this is the one place that can
 // reach the model, the workspace root and the approval mode at once.
 //
 // Fire-and-forget on purpose: the user has already moved on, and a failed

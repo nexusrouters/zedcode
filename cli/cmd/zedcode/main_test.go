@@ -11,7 +11,7 @@ func TestRunHelp(t *testing.T) {
 	if err := run(nil, &output, &bytes.Buffer{}); err != nil {
 		t.Fatalf("run returned an error: %v", err)
 	}
-	if !strings.Contains(output.String(), "Termigo CLI") {
+	if !strings.Contains(output.String(), "ZedCode CLI") {
 		t.Fatalf("help did not include the CLI name: %q", output.String())
 	}
 }
@@ -21,7 +21,7 @@ func TestRunVersion(t *testing.T) {
 	if err := run([]string{"version"}, &output, &bytes.Buffer{}); err != nil {
 		t.Fatalf("run returned an error: %v", err)
 	}
-	if !strings.Contains(output.String(), "termigo") {
+	if !strings.Contains(output.String(), "zedcode") {
 		t.Fatalf("version did not include the executable name: %q", output.String())
 	}
 }

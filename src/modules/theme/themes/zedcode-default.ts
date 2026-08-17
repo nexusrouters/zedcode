@@ -1,7 +1,7 @@
 import type { Theme } from "../types";
 
-export const termigoDefault: Theme = {
-  id: "termigo-default",
+export const zedcodeDefault: Theme = {
+  id: "zedcode-default",
   name: "ZedCode Default",
   description:
     "The signature ZedCode look — deep navy stage with teal and violet glow.",

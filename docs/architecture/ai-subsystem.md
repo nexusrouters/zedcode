@@ -1,6 +1,6 @@
 # AI subsystem
 
-This guide elaborates on `TERMIGO.md`. If anything here conflicts with `TERMIGO.md`, `TERMIGO.md` wins.
+This guide elaborates on `ZEDCODE.md`. If anything here conflicts with `ZEDCODE.md`, `ZEDCODE.md` wins.
 
 ## Overview
 
@@ -36,7 +36,7 @@ Keys are never persisted outside the OS keychain / Linux secrets file.
 `runAgentStream` (`agent.ts:391`):
 
 1. Resolves the model via `buildConfiguredLanguageModel`.
-2. Builds a stable system prompt from `selectSystemPrompt(modelId)` plus optional persona, custom instructions, and `TERMIGO.md` project memory.
+2. Builds a stable system prompt from `selectSystemPrompt(modelId)` plus optional persona, custom instructions, and `ZEDCODE.md` project memory.
 3. Converts UI messages to model messages, prunes reasoning content if the model does not keep it, and compacts old messages if the context limit is exceeded.
 4. Streams via `streamText` with the tool set from `buildTools(ctx)` and three stop conditions (below).
 5. Emits step labels, usage deltas, and finish metadata including the stop reason.
@@ -63,7 +63,7 @@ Fan-out on step 0 is forced rather than requested. `lib/orchestrationIntent.ts` 
 
 ## Sessions
 
-Conversations are organized into sessions. Persistence lives in `termigo-ai-sessions.json` via `tauri-plugin-store` (`src/modules/ai/lib/sessions.ts`):
+Conversations are organized into sessions. Persistence lives in `zedcode-ai-sessions.json` via `tauri-plugin-store` (`src/modules/ai/lib/sessions.ts`):
 
 - `sessions` key: list of session metadata
 - `activeId` key: active session id
@@ -128,7 +128,7 @@ Captures are shown as JSON rather than reformatted prose: a debug view that resh
 
 ### When a request fails
 
-`formatAiError` (`lib/errors.ts`) turns a provider rejection into the text shown in the chat, stripping bearer tokens and API keys on the way. `transport.ts` wraps it so the same text is also written to the app log — `%LOCALAPPDATA%\<identifier>\logs\Termigo.log` on Windows, the platform log directory elsewhere, via `tauri-plugin-log`. AI requests are made from the webview, so before this nothing about them reached that file, which records only the Rust side: a run that died mid-stream left no trace, and diagnosing one meant catching the message on screen before it scrolled away. The formatted text is logged rather than the raw error, because the raw value still carries the request headers.
+`formatAiError` (`lib/errors.ts`) turns a provider rejection into the text shown in the chat, stripping bearer tokens and API keys on the way. `transport.ts` wraps it so the same text is also written to the app log — `%LOCALAPPDATA%\<identifier>\logs\ZedCode.log` on Windows, the platform log directory elsewhere, via `tauri-plugin-log`. AI requests are made from the webview, so before this nothing about them reached that file, which records only the Rust side: a run that died mid-stream left no trace, and diagnosing one meant catching the message on screen before it scrolled away. The formatted text is logged rather than the raw error, because the raw value still carries the request headers.
 
 ## Edit diffs
 
@@ -149,23 +149,23 @@ AI-proposed file edits open in an `ai-diff` tab. The user accepts or rejects per
 
 ## See also
 
-- [`TERMIGO.md`](../../TERMIGO.md) - the architecture source of truth
+- [`ZEDCODE.md`](../../ZEDCODE.md) - the architecture source of truth
 - [`docs/README.md`](../README.md) - index of contributor guides
 - [Two-process model](two-process-model.md) - IPC boundary and command catalog
 - [Security model](security-model.md) - the boundaries every tool must respect
 
 ## Implementation notes
 
-Moved verbatim from `TERMIGO.md` when that file was trimmed to fit the 10 KB of project memory the agent is given. Where this repeats a section above, the section above is the fuller account.
+Moved verbatim from `ZEDCODE.md` when that file was trimmed to fit the 10 KB of project memory the agent is given. Where this repeats a section above, the section above is the fuller account.
 
 BYOK. Cloud providers via `@ai-sdk/*`: **OpenAI, Anthropic, Google, xAI, Cerebras, Groq, DeepSeek, Mistral, OpenRouter**, plus **OpenAI-compatible** for any custom base URL. Local / offline providers (key-optional, model id supplied at runtime): **LM Studio, MLX, Ollama**. Provider list in `config.ts` (`PROVIDERS`); model registry includes `DEFAULT_MODEL_ID` + `DEFAULT_AUTOCOMPLETE_MODEL`.
 
-- **Key storage**: OS keychain via `keyring` (Rust). Frontend reads/writes through `secrets_*` commands. Service `KEYRING_SERVICE = "termigo-ai"`. Never persist keys to disk, settings store, or `localStorage`.
+- **Key storage**: OS keychain via `keyring` (Rust). Frontend reads/writes through `secrets_*` commands. Service `KEYRING_SERVICE = "zedcode-ai"`. Never persist keys to disk, settings store, or `localStorage`.
 - **Agent** (`lib/agent.ts`): `Experimental_Agent` with the system prompt from `config.ts` and three stop conditions, each recording which tripped so `onFinishMeta` can report a named `AgentStopReason` instead of a bare "hit the cap": the round's `stepCountIs(stepBudget)`, `noToolRepetition(3)` (same tool, same canonicalised input, three steps running), and `noProgressStop(2)` (two consecutive tool-less steps). The budget escalates per Continue via `AGENT_STEP_BUDGETS` `[25, 50, 100]` (round one matches VS Code agent mode's default), tracked as `agentMeta.runRound` and reset by a typed message. Provider branching happens here - keep the `Agent` / `DirectChatTransport` shape; the rest of the system depends on AI SDK v6 chat semantics.
 - **Sub-agents** (`agents/registry.ts`, `agents/runSubagent.ts`, `tools/subagent.ts`): named sub-agents with their own system prompts and tool subsets. `run_subagent` spawns one; `run_subagents` spawns a batch, which is the one to reach for. A batch runs independent tasks concurrently (bounded by `max_concurrency`), and a task's `depends_on` makes it wait for others and receive their summaries, so a synthesising task can be handed what the others gathered. Subagents are read-only and auto-execute; each has a fresh history, so every prompt must stand alone. Step 0 is pinned to a fan-out via `toolChoice` (`lib/orchestrationIntent.ts`) only for a broad *study* request, because asking for one in the prompt gets ignored.
 
   Note what that excludes: the classifier fires on study verbs (audit, explore, understand) plus a breadth cue, not on creation. "Build me a website" and "build the frontend and the backend" are measured as ordinary requests, and rightly so - a sub-agent's tools are `read_file`, `list_directory`, `grep`, `glob`, and it returns a summary. It cannot build anything. Documentation that implied otherwise was corrected.
-- **Sessions** (`lib/sessions.ts` + `store/chatStore.ts`): conversations are organized into named sessions, persisted via `tauri-plugin-store` at `termigo-ai-sessions.json` (list + `activeId` + per-session `messages:<id>` keys). `chatStore.ts` keeps a module-scoped `Map<sessionId, Chat<UIMessage>>`; `getOrCreateChat(apiKey, sessionId)` lazily constructs a `Chat`, seeded with messages from a hydration map populated by `hydrateSessions()` (called once from `App.tsx`). `AgentRunBridge` mirrors active-session messages to disk on every change and auto-derives titles from the first user message. Switching the API key wipes the chat map; sessions persist.
+- **Sessions** (`lib/sessions.ts` + `store/chatStore.ts`): conversations are organized into named sessions, persisted via `tauri-plugin-store` at `zedcode-ai-sessions.json` (list + `activeId` + per-session `messages:<id>` keys). `chatStore.ts` keeps a module-scoped `Map<sessionId, Chat<UIMessage>>`; `getOrCreateChat(apiKey, sessionId)` lazily constructs a `Chat`, seeded with messages from a hydration map populated by `hydrateSessions()` (called once from `App.tsx`). `AgentRunBridge` mirrors active-session messages to disk on every change and auto-derives titles from the first user message. Switching the API key wipes the chat map; sessions persist.
 - **Composer** (`lib/composer.tsx`): React context providing shared input state (text, attachments, voice) for both the docked `AiInputBar` and any other surface. Attachments include image, text-file, and `selection` kinds - selections come from `useChatStore.attachSelection(text, source)` (drained into chips, not pasted into the textarea) and are wrapped as `<selection source="terminal|editor">…</selection>` blocks at submit. Composer derives `isBusy` from `agentMeta.status` so it can mount safely before sessions hydrate.
 - **Voice input**: streamed transcription pipeline. Toggled from the composer.
 - **Live context bridge**: `App.tsx` calls `setLive({ getCwd, getTerminalContext, … })` so tools can read the *currently active* terminal's cwd + last 300 lines of buffer. Lazy by design - don't pre-snapshot.

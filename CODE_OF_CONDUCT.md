@@ -1,12 +1,12 @@
 # Code of conduct
 
-Termigo is a small open-source project and we want it to stay a place people enjoy contributing to.
+ZedCode is a small open-source project and we want it to stay a place people enjoy contributing to.
 
 ## The rules, briefly
 
 - **Be respectful.** Disagreement is fine; rudeness, condescension, and personal attacks are not.
 - **Assume good faith.** Most miscommunication isn't malicious - clarify before escalating.
-- **Stay on topic.** Issues, PRs, and discussions are about Termigo. Take off-topic conversations elsewhere.
+- **Stay on topic.** Issues, PRs, and discussions are about ZedCode. Take off-topic conversations elsewhere.
 - **No harassment.** Targeted insults, slurs, sustained disruption, sexualized comments, doxxing, or threats are not tolerated - anywhere, against anyone.
 - **No spam.** That includes promotional links, irrelevant cross-posting, and AI-generated noise that doesn't engage with the actual conversation.
 
@@ -14,7 +14,7 @@ This applies to everything inside the project: issues, PRs, discussions, commits
 
 ## Enforcement
 
-If you see a violation - or experience one - email **dev@99apps.id** with subject `[Termigo conduct]`. Include links and context.
+If you see a violation - or experience one - email **dev@nexusrouters.id** with subject `[ZedCode conduct]`. Include links and context.
 
 Maintainers may, at their discretion:
 

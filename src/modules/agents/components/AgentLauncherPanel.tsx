@@ -57,7 +57,7 @@ export function AgentLauncherPanel({ onBack, onLaunch }: Props) {
     persistedRef.current = next;
     void setAgentLaunchCommands(next).catch((error) => {
       persistedRef.current = previous;
-      console.error("[termigo] failed to save agent launch commands:", error);
+      console.error("[zedcode] failed to save agent launch commands:", error);
     });
   };
 

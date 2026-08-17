@@ -66,11 +66,11 @@ describe("slugifySkillName", () => {
 
 describe("skillPath", () => {
   it("puts each skill in its own directory", () => {
-    expect(skillPath("/ws", "deploy")).toBe("/ws/.termigo/skills/deploy/SKILL.md");
+    expect(skillPath("/ws", "deploy")).toBe("/ws/.zedcode/skills/deploy/SKILL.md");
   });
 
   it("does not double the separator on a trailing slash", () => {
-    expect(skillPath("/ws/", "deploy")).toBe("/ws/.termigo/skills/deploy/SKILL.md");
+    expect(skillPath("/ws/", "deploy")).toBe("/ws/.zedcode/skills/deploy/SKILL.md");
   });
 });
 

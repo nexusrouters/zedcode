@@ -1,4 +1,4 @@
-//! Lenient version comparison and `engines.termigo` constraint matching.
+//! Lenient version comparison and `engines.zedcode` constraint matching.
 //!
 //! Neutral logic shared by the Tauri command surface (`commands.rs`) and the
 //! headless CLI (`cli_ext.rs`, `cli_update.rs`). Lives here so neither the
@@ -34,7 +34,7 @@ pub(crate) fn compare_versions(a: &str, b: &str) -> std::cmp::Ordering {
     std::cmp::Ordering::Equal
 }
 
-/// True iff `host` satisfies the `engines.termigo` constraint. Supports the
+/// True iff `host` satisfies the `engines.zedcode` constraint. Supports the
 /// shapes extensions in this project actually use: empty / `*` (any),
 /// `">=X.Y.Z"`, `">X.Y.Z"`, `"<=X.Y.Z"`, `"<X.Y.Z"`, `"=X.Y.Z"`, and plain
 /// `"X.Y.Z"` (exact). Comparison uses [`compare_versions`] so `v` prefixes

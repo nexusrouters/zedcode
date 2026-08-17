@@ -1,5 +1,5 @@
 /**
- * Shape and validation for the `.termigo-ssh` connection backup.
+ * Shape and validation for the `.zedcode-ssh` connection backup.
  *
  * An import is a TRUST BOUNDARY: the file came off a USB stick or a chat, and
  * whatever survives this module is written straight into the connections store
@@ -14,9 +14,9 @@
  */
 import type { SshConnection, SshAuthMode, SshPortForward } from "./connections";
 
-export const BACKUP_KIND = "termigo-ssh-connections";
+export const BACKUP_KIND = "zedcode-ssh-connections";
 export const BACKUP_VERSION = 1;
-export const BACKUP_EXTENSION = "termigo-ssh";
+export const BACKUP_EXTENSION = "zedcode-ssh";
 
 /** Encrypted payload produced by the Rust `backup_seal` command. */
 export type SealedBlob = {

@@ -340,14 +340,14 @@ impl SshSession {
         }
         if let Some(h) = self.handle.lock().await.take() {
             let _ = h
-                .disconnect(Disconnect::ByApplication, "termigo: client closed", "")
+                .disconnect(Disconnect::ByApplication, "zedcode: client closed", "")
                 .await;
         }
         // Tear the jump chain down from innermost to outermost, after the
         // target handle that rode on top of it is already gone.
         for h in self.jump_handles.lock().await.drain(..).rev() {
             let _ = h
-                .disconnect(Disconnect::ByApplication, "termigo: client closed", "")
+                .disconnect(Disconnect::ByApplication, "zedcode: client closed", "")
                 .await;
         }
         if let Some(j) = self.pump.lock().await.take() {
@@ -672,7 +672,7 @@ async fn open_agent() -> Result<Agent, String> {
 /// then signs over that same connection.
 ///
 /// Certificates are dropped from the list: they need
-/// `authenticate_certificate_with`, a flow Termigo does not implement, and offering
+/// `authenticate_certificate_with`, a flow ZedCode does not implement, and offering
 /// them as plain keys would only burn the server's auth attempts.
 pub(crate) async fn agent_keys() -> Result<(Agent, Vec<PublicKey>), String> {
     let probe = async {
@@ -713,7 +713,7 @@ fn agent_hash_alg(key: &PublicKey) -> Option<HashAlg> {
 }
 
 /// Public-key auth where the private key NEVER LEAVES THE AGENT: the agent signs
-/// each challenge and Termigo only ever sees the signature. That is the whole point
+/// each challenge and ZedCode only ever sees the signature. That is the whole point
 /// of this mode - nothing to paste, nothing in the keychain, nothing that can
 /// leak from here.
 async fn authenticate_agent(
@@ -973,7 +973,7 @@ pub async fn connect(
         // in the inert terminal so the user knows why it accepts no input.
         let fingerprint = report.lock().await.seen.clone().unwrap_or_default();
         let _ = on_event.send(SshEvent::Connected { fingerprint });
-        const SFTP_ONLY_NOTICE: &[u8] = b"\r\n\x1b[33m[termigo] This server allows file transfer (SFTP) only - no interactive shell. The terminal is disabled; use the remote file browser.\x1b[0m\r\n";
+        const SFTP_ONLY_NOTICE: &[u8] = b"\r\n\x1b[33m[zedcode] This server allows file transfer (SFTP) only - no interactive shell. The terminal is disabled; use the remote file browser.\x1b[0m\r\n";
         let _ = on_event.send(SshEvent::Data {
             data: B64.encode(SFTP_ONLY_NOTICE),
         });
@@ -1011,7 +1011,7 @@ pub async fn connect(
     // stays on home. Leading space keeps it out of bash history when
     // HISTCONTROL=ignorespace. Trailing `clear` wipes the snippet's echo
     // and the motd, which is acceptable for a clean prompt.
-    const OSC7_BOOTSTRAP: &[u8] = b" { if [ -n \"$ZSH_VERSION\" ]; then __termigo_o7(){ printf '\\e]7;file://%s%s\\e\\\\' \"${HOST:-$HOSTNAME}\" \"$PWD\"; }; typeset -ag precmd_functions; precmd_functions+=(__termigo_o7); elif [ -n \"$BASH_VERSION\" ]; then __termigo_o7(){ printf '\\e]7;file://%s%s\\e\\\\' \"$HOSTNAME\" \"$PWD\"; }; case \":${PROMPT_COMMAND:-}:\" in *\":__termigo_o7:\"*) ;; *) PROMPT_COMMAND=\"__termigo_o7${PROMPT_COMMAND:+;$PROMPT_COMMAND}\";; esac; fi; __termigo_o7 2>/dev/null; } 2>/dev/null; { clear 2>/dev/null || printf '\\033c'; }\r";
+    const OSC7_BOOTSTRAP: &[u8] = b" { if [ -n \"$ZSH_VERSION\" ]; then __zedcode_o7(){ printf '\\e]7;file://%s%s\\e\\\\' \"${HOST:-$HOSTNAME}\" \"$PWD\"; }; typeset -ag precmd_functions; precmd_functions+=(__zedcode_o7); elif [ -n \"$BASH_VERSION\" ]; then __zedcode_o7(){ printf '\\e]7;file://%s%s\\e\\\\' \"$HOSTNAME\" \"$PWD\"; }; case \":${PROMPT_COMMAND:-}:\" in *\":__zedcode_o7:\"*) ;; *) PROMPT_COMMAND=\"__zedcode_o7${PROMPT_COMMAND:+;$PROMPT_COMMAND}\";; esac; fi; __zedcode_o7 2>/dev/null; } 2>/dev/null; { clear 2>/dev/null || printf '\\033c'; }\r";
     let _ = channel.data(OSC7_BOOTSTRAP).await;
 
     let fingerprint = report.lock().await.seen.clone().unwrap_or_default();
@@ -1180,48 +1180,48 @@ mod chain_tests {
     /// Shared fixture for the live tests below. Every input comes from env vars
     /// - nothing about anyone's infra is hard-coded:
     ///
-    ///   TERMIGO_IT_KEY_PATH     PEM private key file (used for every hop)
-    ///   TERMIGO_IT_TARGET_HOST  final host, TERMIGO_IT_TARGET_USER, TERMIGO_IT_TARGET_FP
-    ///   TERMIGO_IT_JUMP_HOST    jump host (optional), TERMIGO_IT_JUMP_USER, TERMIGO_IT_JUMP_FP
+    ///   ZEDCODE_IT_KEY_PATH     PEM private key file (used for every hop)
+    ///   ZEDCODE_IT_TARGET_HOST  final host, ZEDCODE_IT_TARGET_USER, ZEDCODE_IT_TARGET_FP
+    ///   ZEDCODE_IT_JUMP_HOST    jump host (optional), ZEDCODE_IT_JUMP_USER, ZEDCODE_IT_JUMP_FP
     ///
     /// The `*_FP` SHA256 fingerprints pin each hop so the handshake never blocks
     /// on the interactive host-key dialog (there is no GUI in a test). Missing
     /// required vars => `None`, and the caller skips.
     fn it_input(tag: &str) -> Option<SshOpenInput> {
         let (Ok(key_path), Ok(target_host)) = (
-            std::env::var("TERMIGO_IT_KEY_PATH"),
-            std::env::var("TERMIGO_IT_TARGET_HOST"),
+            std::env::var("ZEDCODE_IT_KEY_PATH"),
+            std::env::var("ZEDCODE_IT_TARGET_HOST"),
         ) else {
-            eprintln!("[{tag}] skipped: set TERMIGO_IT_KEY_PATH + TERMIGO_IT_TARGET_HOST");
+            eprintln!("[{tag}] skipped: set ZEDCODE_IT_KEY_PATH + ZEDCODE_IT_TARGET_HOST");
             return None;
         };
         let key = std::fs::read_to_string(&key_path).expect("read key file");
         let env_opt = |k: &str| std::env::var(k).ok().filter(|v| !v.is_empty());
 
         let mut jumps = Vec::new();
-        if let Some(jump_host) = env_opt("TERMIGO_IT_JUMP_HOST") {
+        if let Some(jump_host) = env_opt("ZEDCODE_IT_JUMP_HOST") {
             jumps.push(SshJumpHop {
                 connection_id: "it-jump".into(),
                 host: jump_host,
                 port: 22,
-                user: env_opt("TERMIGO_IT_JUMP_USER").unwrap_or_else(|| "ubuntu".into()),
+                user: env_opt("ZEDCODE_IT_JUMP_USER").unwrap_or_else(|| "ubuntu".into()),
                 use_agent: false,
                 password: None,
                 private_key: Some(key.clone()),
                 private_key_passphrase: None,
-                expected_fingerprint: env_opt("TERMIGO_IT_JUMP_FP"),
+                expected_fingerprint: env_opt("ZEDCODE_IT_JUMP_FP"),
             });
         }
 
         Some(SshOpenInput {
             host: target_host,
             port: 22,
-            user: env_opt("TERMIGO_IT_TARGET_USER").unwrap_or_else(|| "ubuntu".into()),
+            user: env_opt("ZEDCODE_IT_TARGET_USER").unwrap_or_else(|| "ubuntu".into()),
             use_agent: false,
             password: None,
             private_key: Some(key),
             private_key_passphrase: None,
-            expected_fingerprint: env_opt("TERMIGO_IT_TARGET_FP"),
+            expected_fingerprint: env_opt("ZEDCODE_IT_TARGET_FP"),
             jumps,
             cols: 80,
             rows: 24,

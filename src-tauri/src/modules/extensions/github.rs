@@ -11,18 +11,18 @@
 pub(crate) const MAX_DOWNLOAD_BYTES: u64 = 50 * 1024 * 1024;
 
 /// Generic User-Agent for GitHub requests. Deliberately not app-identifying:
-/// GitHub requires a non-empty UA, but advertising "Termigo" on every release /
+/// GitHub requires a non-empty UA, but advertising "ZedCode" on every release /
 /// extension fetch is an avoidable fingerprint. A neutral token satisfies the
 /// API without naming the app over the wire.
 const USER_AGENT: &str = "Mozilla/5.0";
 
 /// Personal access token for authenticated GitHub REST API calls, read fresh
-/// from `TERMIGO_GITHUB_TOKEN`. Lifts the anonymous 60 req/h cap to 5000 req/h.
+/// from `ZEDCODE_GITHUB_TOKEN`. Lifts the anonymous 60 req/h cap to 5000 req/h.
 /// `None` when unset or blank. Used by the extension installer's API path
 /// (`http_get_text`); the skills installer avoids the API entirely (codeload +
 /// info/refs) so it needs no token.
 pub(crate) fn github_token() -> Option<String> {
-    let tok = std::env::var("TERMIGO_GITHUB_TOKEN").ok()?;
+    let tok = std::env::var("ZEDCODE_GITHUB_TOKEN").ok()?;
     let tok = tok.trim();
     if tok.is_empty() {
         None
@@ -107,7 +107,7 @@ pub(crate) async fn http_get_text(url: &str) -> Result<String, String> {
     let mut req = client
         .get(url)
         .header("Accept", "application/vnd.github+json");
-    // Optional auth: a personal access token in TERMIGO_GITHUB_TOKEN lifts the
+    // Optional auth: a personal access token in ZEDCODE_GITHUB_TOKEN lifts the
     // anonymous 60 req/h cap to 5000 req/h. Only the api.github.com host gets
     // the header; arbitrary URLs do not, in case a redirect ever points
     // elsewhere.
@@ -128,7 +128,7 @@ pub(crate) async fn http_get_text(url: &str) -> Result<String, String> {
         {
             return Err(
                 "GitHub API rate limit reached (60 requests/hour for unauthenticated \
-                 access). Set the TERMIGO_GITHUB_TOKEN environment variable to a personal \
+                 access). Set the ZEDCODE_GITHUB_TOKEN environment variable to a personal \
                  access token to raise the cap to 5000 requests/hour, or wait until the \
                  limit window resets (typically within the hour)."
                     .to_string(),

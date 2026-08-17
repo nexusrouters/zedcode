@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import {
   appendEnvTurn,
   isResumingApproval,
-  TERMIGO_MD_MAX_CHARS,
+  ZEDCODE_MD_MAX_CHARS,
   truncateProjectMemory,
 } from "./transport";
 
@@ -30,7 +30,7 @@ describe("truncateProjectMemory", () => {
   // rather than a document that was cut short.
   it("cuts on a line boundary rather than mid-sentence", () => {
     const doc = `${"a".repeat(100)}\n`.repeat(LIMIT);
-    const out = truncateProjectMemory(doc).replace(/\n\n\[TERMIGO.*$/s, "");
+    const out = truncateProjectMemory(doc).replace(/\n\n\[ZEDCODE.*$/s, "");
     for (const line of out.split("\n")) {
       expect(line === "" || line.length === 100).toBe(true);
     }
@@ -162,8 +162,8 @@ describe("isResumingApproval", () => {
   });
 });
 
-// This repo's own TERMIGO.md is the agent's project memory, and only the first
-// TERMIGO_MD_MAX_CHARS of it are sent. It had grown to 32 KB: the cut landed at
+// This repo's own ZEDCODE.md is the agent's project memory, and only the first
+// ZEDCODE_MD_MAX_CHARS of it are sent. It had grown to 32 KB: the cut landed at
 // line 88 of 188, so the entire AI subsystem section, the UI conventions and
 // the known gotchas were invisible to the agent while still costing every
 // reader who opened the file the impression that they were not.
@@ -171,15 +171,15 @@ describe("isResumingApproval", () => {
 // The file was restructured to fit, with the detail moved into docs/. That
 // only stays true if something checks, so this does - a doc budget is not the
 // kind of thing anyone remembers while writing a paragraph.
-describe("TERMIGO.md fits the budget the agent actually receives", () => {
+describe("ZEDCODE.md fits the budget the agent actually receives", () => {
   it("is not silently truncated before it reaches the model", () => {
-    const doc = readFileSync("TERMIGO.md", "utf8");
+    const doc = readFileSync("ZEDCODE.md", "utf8");
     expect(
       doc.length,
-      `TERMIGO.md is ${doc.length} chars, over the ${TERMIGO_MD_MAX_CHARS} the ` +
+      `ZEDCODE.md is ${doc.length} chars, over the ${ZEDCODE_MD_MAX_CHARS} the ` +
         "agent receives. Everything past the cut is invisible to it. Move " +
         "detail into docs/architecture/ and leave a pointer, rather than " +
         "raising the cap: project memory is paid on every request.",
-    ).toBeLessThanOrEqual(TERMIGO_MD_MAX_CHARS);
+    ).toBeLessThanOrEqual(ZEDCODE_MD_MAX_CHARS);
   });
 });

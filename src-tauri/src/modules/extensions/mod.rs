@@ -4,7 +4,7 @@
 //! frontend via `convertFileSrc` + dynamic `import()`. Rust owns install
 //! (zip extract, URL download, GitHub release fetch), manifest parsing, and
 //! a small persisted state file (`enabled`, install source, install date).
-//! The frontend owns activation, the host API (`window.termigo.*`), and the
+//! The frontend owns activation, the host API (`window.zedcode.*`), and the
 //! contribution registries.
 //!
 //! Security: `zip` extraction rejects entries whose `enclosed_name()` escapes

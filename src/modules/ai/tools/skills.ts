@@ -93,7 +93,7 @@ ${skill.body}`,
 
     create_tool: tool({
       description:
-        "Define a reusable shell command as a named tool, so a command worth repeating becomes something you can call by name instead of retyping. Use AFTER running a command that will recur with different arguments — a deploy script, a log tail, a migration runner. The command is a template with {{placeholders}}; every argument is shell-quoted when it runs, so a value can never become a second command. Stored in .termigo/tools.json. Re-using a name replaces that tool. Asks for approval.",
+        "Define a reusable shell command as a named tool, so a command worth repeating becomes something you can call by name instead of retyping. Use AFTER running a command that will recur with different arguments — a deploy script, a log tail, a migration runner. The command is a template with {{placeholders}}; every argument is shell-quoted when it runs, so a value can never become a second command. Stored in .zedcode/tools.json. Re-using a name replaces that tool. Asks for approval.",
       inputSchema: z.object({
         name: z
           .string()

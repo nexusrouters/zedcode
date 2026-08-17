@@ -50,7 +50,7 @@ export async function collectCandidates(
 ): Promise<SkillCandidate[]> {
   const jobs: Promise<SkillCandidate[]>[] = [];
   if (workspaceRoot) {
-    jobs.push(candidatesIn(`${workspaceRoot.replace(/[\\/]$/, "")}/.termigo/skills`, "workspace"));
+    jobs.push(candidatesIn(`${workspaceRoot.replace(/[\\/]$/, "")}/.zedcode/skills`, "workspace"));
   }
   try {
     const home = (await homeDir()).replace(/[\\/]$/, "");

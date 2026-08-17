@@ -42,4 +42,4 @@ cli/bin/
 .claude/
 
 # Agent session memory and workspace-local agent state
-.termigo/
+.zedcode/

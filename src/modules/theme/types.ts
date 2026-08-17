@@ -65,4 +65,4 @@ export type Theme = {
   };
 };
 
-export const DEFAULT_THEME_ID = "termigo-default";
+export const DEFAULT_THEME_ID = "zedcode-default";

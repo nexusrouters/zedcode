@@ -62,7 +62,7 @@ export function SshBackupDialog({ open, onOpenChange, mode }: Props) {
         // keychain refusal should surface without first making the user pick a
         // filename for a file that was never going to be written.
         const target = await saveFileDialog({
-          defaultPath: `termigo-ssh-connections.${BACKUP_EXTENSION}`,
+          defaultPath: `zedcode-ssh-connections.${BACKUP_EXTENSION}`,
           filters: [{ name: "ZedCode SSH backup", extensions: [BACKUP_EXTENSION] }],
         });
         if (!target) {

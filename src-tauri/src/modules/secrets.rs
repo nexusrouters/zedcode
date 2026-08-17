@@ -145,7 +145,7 @@ const MAX_CHUNK_UTF16: usize = 1000;
 /// header. Both backends store the blob with an explicit length rather than
 /// NUL-terminating it, so the byte survives the round trip.
 #[cfg(any(not(target_os = "linux"), test))]
-const CHUNK_HEADER: &str = "\u{0}termigo-chunked-v1:";
+const CHUNK_HEADER: &str = "\u{0}zedcode-chunked-v1:";
 
 #[cfg(any(not(target_os = "linux"), test))]
 fn chunk_header(count: usize) -> String {
@@ -162,7 +162,7 @@ fn parse_chunk_header(value: &str) -> Option<usize> {
 /// NUL-terminated wide string, so an embedded NUL would truncate it.
 #[cfg(any(not(target_os = "linux"), test))]
 fn chunk_account(account: &str, index: usize) -> String {
-    format!("{account}__termigo_chunk_{index}")
+    format!("{account}__zedcode_chunk_{index}")
 }
 
 /// Split on char boundaries while counting UTF-16 units, which is what the
@@ -409,7 +409,7 @@ mod chunk_tests {
         for value in [
             "sk-ant-api03-abc",
             "-----BEGIN RSA PRIVATE KEY-----",
-            "termigo-chunked-v1:3",
+            "zedcode-chunked-v1:3",
             "\u{0}",
             "",
             "hunter2",
