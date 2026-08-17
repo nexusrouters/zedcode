@@ -151,8 +151,10 @@ export function resolveModel(
 
 export function getModel(id: ModelId): ModelInfo {
   const m = MODELS.find((x) => x.id === id);
-  if (!m) throw new Error(`Unknown model: ${id}`);
-  return m;
+  // A previously-persisted model id may no longer exist in the catalog
+  // (e.g. after switching to a single provider). Fall back to the default
+  // instead of throwing, which would blank the whole settings panel.
+  return m ?? MODELS.find((x) => x.id === DEFAULT_MODEL_ID) ?? MODELS[0];
 }
 
 export function isKnownModelId(id: string): id is ModelId {

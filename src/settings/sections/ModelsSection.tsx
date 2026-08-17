@@ -4,7 +4,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -59,11 +58,6 @@ import {
 import { useChatStore } from "@/modules/ai/store/chatStore";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import {
-  ENDPOINT_PRESETS,
-  presetToEndpoint,
-  type EndpointPreset,
-} from "@/modules/ai/lib/endpointPresets";
-import {
   type AutocompleteTrigger,
   emitKeysChanged,
   setAutocompleteEnabled,
@@ -89,7 +83,6 @@ import {
   setWhispercppBaseURL,
 } from "@/modules/settings/store";
 import {
-  Add01Icon,
   ArrowDown01Icon,
   ArrowUpRight01Icon,
   Cancel01Icon,
@@ -163,7 +156,6 @@ const LOCAL_META: Partial<Record<ProviderId, LocalMeta>> = {
 export function ModelsSection() {
   const [keys, setKeys] = useState<KeysMap | null>(null);
   const [epKeys, setEpKeys] = useState<CustomEndpointKeys>({});
-  const [adding, setAdding] = useState<Set<ProviderId>>(new Set());
   const [zedcodeLoggedIn, setZedcodeLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -217,21 +209,6 @@ export function ModelsSection() {
     await emitKeysChanged();
   };
 
-  const addCustomEndpoint = async (preset?: EndpointPreset) => {
-    const id = crypto.randomUUID().slice(0, 8);
-    // A preset only fills the fields in; every one stays editable, so a base
-    // URL or model that ages out costs a correction rather than a release.
-    const ep: CustomEndpoint = preset
-      ? presetToEndpoint(preset, id)
-      : {
-          id,
-          name: "",
-          baseURL: "",
-          modelId: "",
-          contextLimit: 128_000,
-        };
-    await setCustomEndpoints([...customEndpoints, ep]);
-  };
 
   const updateCustomEndpoint = async (
     id: string,
@@ -342,14 +319,9 @@ export function ModelsSection() {
   const configuredIds = new Set(
     PROVIDERS.filter((p) => isConfigured(p.id)).map((p) => p.id),
   );
-  const visibleIds = new Set<ProviderId>(configuredIds);
-  for (const id of adding) visibleIds.add(id);
-  const visibleProviders = PROVIDERS.filter(
-    (p) => p.id !== "openai-compatible" && visibleIds.has(p.id),
-  );
-  const addableProviders = PROVIDERS.filter(
-    (p) => p.id !== "openai-compatible" && !visibleIds.has(p.id),
-  );
+  // Single-provider build: ZedCode is the only provider and is always shown.
+  // There is nothing to "add", so the Add-provider menu is gone.
+  const visibleProviders = PROVIDERS.filter((p) => p.id !== "openai-compatible");
 
   const removeProvider = (id: ProviderId) => {
     if (id === "zedcode") {
@@ -367,15 +339,6 @@ export function ModelsSection() {
     } else {
       void onClearKey(id);
     }
-    setAdding((prev) => {
-      const next = new Set(prev);
-      next.delete(id);
-      return next;
-    });
-  };
-
-  const addProvider = (id: ProviderId) => {
-    setAdding((prev) => new Set(prev).add(id));
   };
 
   return (
@@ -396,12 +359,7 @@ export function ModelsSection() {
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <Label>Providers</Label>
-          <AddProviderMenu
-            providers={addableProviders}
-            onAdd={addProvider}
-            onAddCompat={addCustomEndpoint}
-          />
+          <Label>Provider</Label>
         </div>
 
         {visibleProviders.length === 0 && customEndpoints.length === 0 ? (
@@ -628,91 +586,6 @@ function ZedcodeCard({
         )}
       </div>
     </div>
-  );
-}
-
-function AddProviderMenu({
-  providers,
-  onAdd,
-  onAddCompat,
-}: {
-  providers: readonly ProviderInfo[];
-  onAdd: (id: ProviderId) => void;
-  onAddCompat: (preset?: EndpointPreset) => void;
-}) {
-  const cloud = providers.filter((p) => !isLocalProvider(p.id));
-  const local = providers.filter(
-    (p) => isLocalProvider(p.id) && p.id !== "openai-compatible",
-  );
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-7 gap-1.5 px-2.5 text-[11px]"
-        >
-          <HugeiconsIcon icon={Add01Icon} size={12} strokeWidth={2} />
-          Add provider
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-55 p-1">
-        {cloud.length > 0 ? (
-          <>
-            <DropdownMenuLabel className="px-2 text-[10px] tracking-wide text-muted-foreground uppercase">
-              Cloud
-            </DropdownMenuLabel>
-            {cloud.map((p) => (
-              <ProviderMenuItem key={p.id} provider={p} onAdd={onAdd} />
-            ))}
-          </>
-        ) : null}
-        <DropdownMenuLabel className="px-2 text-[10px] tracking-wide text-muted-foreground uppercase">
-          Local & custom
-        </DropdownMenuLabel>
-        {local.map((p) => (
-          <ProviderMenuItem key={p.id} provider={p} onAdd={onAdd} />
-        ))}
-        {/* Presets first: the base URL is the one field a user cannot guess
-            and the one most often mistyped. */}
-        {ENDPOINT_PRESETS.map((preset) => (
-          <DropdownMenuItem
-            key={preset.id}
-            onSelect={() => onAddCompat(preset)}
-            className="flex items-center gap-2 text-[12px]"
-          >
-            <ProviderIcon provider="openai-compatible" size={13} />
-            <span>{preset.name}</span>
-          </DropdownMenuItem>
-        ))}
-        <DropdownMenuItem
-          onSelect={() => onAddCompat()}
-          className="flex items-center gap-2 text-[12px]"
-        >
-          <ProviderIcon provider="openai-compatible" size={13} />
-          <span>OpenAI Compatible</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-function ProviderMenuItem({
-  provider,
-  onAdd,
-}: {
-  provider: ProviderInfo;
-  onAdd: (id: ProviderId) => void;
-}) {
-  return (
-    <DropdownMenuItem
-      onSelect={() => onAdd(provider.id)}
-      className="flex items-center gap-2 text-[12px]"
-    >
-      <ProviderIcon provider={provider.id} size={13} />
-      <span>{provider.label}</span>
-    </DropdownMenuItem>
   );
 }
 
@@ -1154,7 +1027,7 @@ function LocalProviderCard({
                 value={contextDraft}
                 onChange={(e) => setContextDraft(e.target.value)}
                 onBlur={() => {
-                  const v = parseInt(contextDraft);
+                  const v = parseInt(contextDraft, 10);
                   if (Number.isFinite(v) && v >= 1000) void setContextLimit(v);
                   else setContextDraft(String(contextLimit ?? ""));
                 }}
@@ -1390,7 +1263,7 @@ function CustomEndpointCard({
                 value={contextDraft}
                 onChange={(e) => setContextDraft(e.target.value)}
                 onBlur={() => {
-                  const v = parseInt(contextDraft);
+                  const v = parseInt(contextDraft, 10);
                   if (Number.isFinite(v) && v >= 1000)
                     void onUpdate({ contextLimit: v });
                   else setContextDraft(String(endpoint.contextLimit ?? ""));
